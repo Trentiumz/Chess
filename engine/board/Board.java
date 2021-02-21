@@ -17,7 +17,6 @@ public class Board implements Copyable {
     public Pawn enPassant;
 
     int moveNum = 0;
-    public final static byte drawMoveCount = 100;
     public static HashMap<Tools.Piece, Integer> scores = new HashMap<>() {{
         put(Tools.Piece.queen, 100);
         put(Tools.Piece.king, 900);
@@ -102,9 +101,9 @@ public class Board implements Copyable {
         int rating = 0;
         for (Piece p : pieces) {
             if (p.side == currentSide)
-                rating += scores.get(p.getPiece());
+                rating += p.rating();
             else
-                rating -= scores.get(p.getPiece());
+                rating -= p.rating();
         }
         if (getBoardResult() == switch (currentSide) {
             case White -> Tools.Result.WhiteWon;
@@ -232,10 +231,6 @@ public class Board implements Copyable {
     }
 
     public Tools.Result getBoardResult() {
-        // Check for perpetual
-        if (moveNum >= drawMoveCount)
-            return Tools.Result.Draw;
-
         // If the other side doesn't have any moves
         boolean otherSideHasMoves = false;
         for (Piece piece : this.pieces)

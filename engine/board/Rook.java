@@ -69,4 +69,9 @@ public class Rook extends Piece {
         return toreturn;
     }
 
+    @Override
+    public float rating() {
+        return 50 + getRating();
+    }
+
 }

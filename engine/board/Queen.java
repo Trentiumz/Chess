@@ -49,4 +49,9 @@ public class Queen extends Piece {
     public Queen copy(){
         return new Queen(boardx, boardy, side, board);
     }
+
+    @Override
+    public float rating() {
+        return 100 + getRating();
+    }
 }

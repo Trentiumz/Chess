@@ -13,6 +13,9 @@ public class Tools {
     // SPRITE TO IMAGE
     public static final HashMap<Sprite, PImage> pieces = new HashMap<>();
 
+    // Must be flipped sometimes; this position is accurate for a black piece at int[x][y]
+    public static final HashMap<Piece, float[][]> positionRatings = new HashMap<>();
+
     // MAIN ENUMS
     public enum Sprite {
         board, bpawn, bbishop, bknight, brook, bqueen, bking,
@@ -31,11 +34,10 @@ public class Tools {
         WhiteWon, BlackWon, Draw
     }
 
-    // TODO DEBUGGING
-    public static int lastNum;
 
     // HAS THE PROMOTION ORDER
     public static final Tools.Piece[] promotionOrder = {Tools.Piece.queen, Tools.Piece.rook, Tools.Piece.bishop, Tools.Piece.knight};
+
 
     // INSTANCE OF THE MAIN FUNCTION
     private static Main owner;
@@ -52,10 +54,13 @@ public class Tools {
 
     /**
      * Initialize the images with various sprites
-     *
+     * @param sprites the array of images corresponding to the sprites
+     * @param positionRatings the array of 2-d arrays corresponding to the position ratings
      * @implNote {board, bpawn, bbishop, bknight, brook, bqueen, bking, wpawn, wbishop, wknight, wrook, wqueen, wking, wallpaper}
+     * @implNote {pawn position ratings, bishop position ratings, knight, rook, queen, king}
      */
-    public static void initialize(PImage[] sprites, Main main) {
+    public static void initialize(PImage[] sprites, float[][][] positionRatings, Main main) {
+        // First the sprites
         pieces.put(Sprite.board, sprites[0]);
         pieces.put(Sprite.bpawn, sprites[1]);
         pieces.put(Sprite.bbishop, sprites[2]);
@@ -72,6 +77,15 @@ public class Tools {
         pieces.put(Sprite.wking, sprites[12]);
 
         pieces.put(Sprite.wallpaper, sprites[13]);
+
+        // Now the positions
+        Tools.positionRatings.put(Piece.pawn, positionRatings[0]);
+        Tools.positionRatings.put(Piece.bishop, positionRatings[1]);
+        Tools.positionRatings.put(Piece.knight, positionRatings[2]);
+        Tools.positionRatings.put(Piece.rook, positionRatings[3]);
+        Tools.positionRatings.put(Piece.queen, positionRatings[4]);
+        Tools.positionRatings.put(Piece.king, positionRatings[5]);
+
         owner = main;
     }
 
@@ -192,5 +206,9 @@ public class Tools {
 
     public static Tools.Side opposite(Tools.Side side) {
         return side == Side.White ? Side.Black : Side.White;
+    }
+
+    public static float getPositionRating(Piece piece, int x, int y){
+        return positionRatings.get(piece)[x][y];
     }
 }

@@ -95,6 +95,11 @@ public class Pawn extends Piece {
         return new Pawn(boardx, boardy, side, board);
     }
 
+    @Override
+    public float rating() {
+        return 10 + getRating();
+    }
+
     // PROMOTING
 
     public Piece promote(Tools.Piece piece) throws InvalidPieceException {

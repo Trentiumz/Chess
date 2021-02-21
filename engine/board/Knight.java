@@ -44,4 +44,9 @@ public class Knight extends Piece{
 		return new Knight(boardx, boardy, side, board);
 	}
 
+	@Override
+	public float rating() {
+		return 30 + getRating();
+	}
+
 }

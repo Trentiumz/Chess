@@ -3,7 +3,6 @@ package engine.board;
 import engine.Tools;
 import engine.Tools.Side;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 
 public class King extends Piece {
@@ -78,5 +77,10 @@ public class King extends Piece {
         King toreturn = new King(boardx, boardy, side, board);
         toreturn.didMove = this.didMove;
         return toreturn;
+    }
+
+    @Override
+    public float rating() {
+        return 900 + getRating();
     }
 }

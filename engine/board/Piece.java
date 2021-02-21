@@ -4,7 +4,6 @@ import engine.Main;
 import engine.Tools;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 
 public abstract class Piece implements Copyable {
@@ -85,7 +84,6 @@ public abstract class Piece implements Copyable {
         for (Integer number : toreturn) {
             Board pseudoBoard = board.copy();
             Piece self = pseudoBoard.getPiece(boardx, boardy);
-            Tools.lastNum = number;
             self.moveTo(Tools.getX(number), Tools.getY(number));
             if (pseudoBoard.inCheck(side))
                 toremove.add(number);
@@ -117,6 +115,7 @@ public abstract class Piece implements Copyable {
 
     public abstract Piece copy();
 
+    public abstract float rating();
 
     // RENDERING
 
@@ -127,5 +126,12 @@ public abstract class Piece implements Copyable {
     public void renderSelected() {
         Tools.drawRect(boardx * Main.CELL_SIZE, boardy * Main.CELL_SIZE, Main.CELL_SIZE, Main.CELL_SIZE, 255, 87, 51, 130);
         render();
+    }
+
+
+    // TOOL METHODS
+    protected float getRating(){
+        int layer = side == Tools.Side.Black ? boardy : 7 - boardy;
+        return Tools.getPositionRating(getPiece(), boardx, layer);
     }
 }

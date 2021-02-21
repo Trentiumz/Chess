@@ -49,4 +49,9 @@ public class Bishop extends Piece{
 	public Bishop copy(){
 		return new Bishop(boardx, boardy, side, board);
 	}
+
+	@Override
+	public float rating() {
+		return 30 + getRating();
+	}
 }

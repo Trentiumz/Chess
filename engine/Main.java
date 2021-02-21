@@ -35,8 +35,19 @@ public class Main extends PApplet {
         results[13] = loadImage("background.jpg");
         results[13].resize(DEFAULT_SIZE, DEFAULT_SIZE);
 
+        // Getting the position ratings
+        String[] order = {"pawn", "bishop", "knight", "rook", "queen", "king"};
+        float[][][] ratings = new float[6][8][8];
+        for(int i = 0; i < 6; ++i){
+            String[] lines = this.loadStrings("botAssist/positionRatings/" + order[i] + ".pr");
+            for(int l = 0; l < 8; ++l){
+                String[] parts = lines[l].split(" ");
+                for(int k = 0; k < 8; ++k) ratings[i][l][k] = Float.parseFloat(parts[k]);
+            }
+        }
+
         // initialize the sprites in the tools
-        Tools.initialize(results, this);
+        Tools.initialize(results, ratings, this);
 
         // Initialize the board
         currentState = new MenuState();

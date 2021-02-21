@@ -5,9 +5,6 @@ import engine.SoundPlayer;
 import engine.Tools;
 import engine.board.BoardClient;
 
-import java.util.TimerTask;
-import java.util.Timer;
-
 public class MainState implements State{
 
     public final BoardClient board;
