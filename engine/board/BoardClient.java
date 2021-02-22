@@ -59,12 +59,13 @@ public class BoardClient {
     // SIMPLIFICATION TOOL METHODS
 
     /**
-     * update the move so that it's a new move
+     * update the move so that it's the next player's turn
      */
     private void nextMove() {
         board.currentMove = board.opposite();
         ++board.moveNum;
         selectedPiece = null;
+
     }
 
     public void render() {
@@ -79,7 +80,35 @@ public class BoardClient {
      */
     class MainState implements ClientState {
         public Tools.Result click(int x, int y) {
-            cellClicked(x / Main.CELL_SIZE, y / Main.CELL_SIZE);
+            x = x / Main.CELL_SIZE;
+            y = y / Main.CELL_SIZE;
+            if (x > 7 || x < 0 || y > 7 || y < 0)
+                throw new InvalidBoardPositionException("engine.board had cell clicked at (" + x + " " + y + "); not valid!");
+
+            // If selectedPiece != null, then we move the piece
+            if (selectedPiece != null) {
+                Pawn thePassant = board.enPassant;
+                if (thePassant != null && board.enPassant.side == board.currentMove)
+                    board.enPassant = null;
+
+                if (board.movePiece(selectedPiece, x, y)){
+                    board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
+                    if(board.atEnd == null)
+                        nextMove();
+                }
+                else{
+                    selectedPiece = null;
+                    board.enPassant = thePassant;
+                }
+                if (board.atEnd != null) {
+                    currentState = promotionState;
+                }
+            } else {
+                // Get the piece at the cell, and select it
+                Piece pieceAtCell = board.getPiece(x, y);
+                if (pieceAtCell != null && pieceAtCell.side == board.currentMove)
+                    selectedPiece = board.getPiece(x, y);
+            }
             return getBoardResult();
         }
 
@@ -87,18 +116,22 @@ public class BoardClient {
         @Override
         public Tools.Result botClick(int[] start, int[] end) {
             Piece selectedPiece = board.getPiece(start[0], start[1]);
-            if (board.enPassant != null && board.enPassant.side == board.currentMove)
+            if (board.enPassant != null && board.enPassant.side == board.currentMove){
+                board.addUndoMove(new Move(Tools.Instruction.setEnPassant, board.enPassant, null));
                 board.enPassant = null;
+            }
             board.movePiece(selectedPiece, end[0], end[1]);
             if (board.atEnd != null)
                 currentState = promotionState;
-            nextMove();
             // If we're gonna promote, then do the promotion first
             if (isPromotionState()) {
                 int indexeu = end[2];
-                board.promote(Tools.promotionOrder[indexeu]);
+                board.addUndoMove(new Move(Tools.Instruction.add, board.atEnd, null));
+                Piece thePromoted = board.promote(Tools.promotionOrder[indexeu]);
+                board.addUndoMove(new Move(Tools.Instruction.remove, thePromoted, null));
                 currentState = mainState;
             }
+            nextMove();
 
             return getBoardResult();
         }
@@ -121,10 +154,13 @@ public class BoardClient {
      */
     class PromotionState implements ClientState {
         public Tools.Result click(int x, int y) {
+            // TODO give the ability to undo the promotion
             if ((y / Main.CELL_SIZE) == 1) {
                 int indexeu = x / Main.CELL_SIZE - 2;
                 if (indexeu >= 0 && indexeu < 4) {
-                    board.promote(Tools.promotionOrder[indexeu]);
+                    board.addUndoMove(new Move(Tools.Instruction.add, board.atEnd, null));
+                    Piece thePromoted = board.promote(Tools.promotionOrder[indexeu]);
+                    board.addUndoMove(new Move(Tools.Instruction.remove, thePromoted, null));
                     nextMove();
                     currentState = mainState;
                 }
@@ -154,34 +190,6 @@ public class BoardClient {
         void render();
     }
 
-
-    // MAIN CELL CLICKED METHOD
-
-    private void cellClicked(int x, int y) {
-        if (x > 7 || x < 0 || y > 7 || y < 0)
-            throw new InvalidBoardPositionException("engine.board had cell clicked at (" + x + " " + y + "); not valid!");
-
-        // If selectedPiece != null, then we move the piece
-        if (selectedPiece != null) {
-            // TODO Fix the enPassant bug; when you double forward the pawn, ai moves, then you click the pawn and click out, the enPassant gets removed
-            // TODO somehow make it so that when a piece stops being enPassant, that the undo makes it an enPassant again
-            if (board.enPassant != null && board.enPassant.side == board.currentMove)
-                board.enPassant = null;
-            if (board.movePiece(selectedPiece, x, y) && board.atEnd == null){
-                nextMove();
-            }
-            else
-                selectedPiece = null;
-            if (board.atEnd != null) {
-                currentState = promotionState;
-            }
-        } else {
-            // Get the piece at the cell, and select it
-            Piece pieceAtCell = board.getPiece(x, y);
-            if (pieceAtCell != null && pieceAtCell.side == board.currentMove)
-                selectedPiece = board.getPiece(x, y);
-        }
-    }
 
     // INFORMATION METHODS
 

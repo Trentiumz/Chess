@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Board implements Copyable {
 
-    final ArrayList<Piece> pieces;
+    final Collection<Piece> pieces;
     King whiteKing;
     King blackKing;
     public Tools.Side currentMove;
@@ -25,7 +25,7 @@ public class Board implements Copyable {
      * These are all numbers corresponding to the enums of Tools.Instruction & Tools.Piece
      * The moves are also in chronological order; we undo by doing the last instruction first
      */
-    private final Deque<Move[]> undoMoves = new ArrayDeque<>();
+    private final Deque<ArrayList<Move>> undoMoves = new ArrayDeque<>();
 
 
     public Board() {
@@ -60,10 +60,12 @@ public class Board implements Copyable {
         enPassant = pawn;
     }
 
-    public void promote(Tools.Piece piece) {
-        this.addPiece(atEnd.promote(piece));
+    public Piece promote(Tools.Piece piece) {
+        Piece toreturn = atEnd.promote(piece);
+        this.addPiece(toreturn);
         removePiece(atEnd);
         atEnd = null;
+        return toreturn;
     }
 
     public void removePiece(Piece toremove) {
@@ -93,9 +95,9 @@ public class Board implements Copyable {
     public void undoLatest(Tools.Side side) throws InvalidSideException {
         if(currentMove == side)
             throw new InvalidSideException("The one who called to undo is currently supposed to move " + side + " " + currentMove);
-        Move[] last = undoMoves.removeLast();
-        for(int i = last.length - 1; i >= 0; --i){
-            Move m = last[i];
+        ArrayList<Move> last = undoMoves.removeLast();
+        for(int i = last.size() - 1; i >= 0; --i){
+            Move m = last.get(i);
             switch(m.instruction){
                 case move -> m.piece.setPosition(m.coords[0], m.coords[1]);
                 case add -> addPiece(m.piece);
@@ -104,6 +106,8 @@ public class Board implements Copyable {
                 case rookUnMoved -> ((Rook) m.piece).isMoved = false;
                 case resetEnPassant -> enPassant = null;
                 case resetAtEnd -> atEnd = null;
+                case setEnPassant -> enPassant = (Pawn) m.piece;
+                case setAtEnd -> atEnd = (Pawn) m.piece;
             }
         }
         currentMove = opposite();
@@ -270,7 +274,12 @@ public class Board implements Copyable {
         return null;
     }
 
-    public void addUndo(Move[] move){
+    public void addUndo(ArrayList<Move> move){
         undoMoves.add(move);
+    }
+
+    public void addUndoMove(Move toAdd){
+        assert this.undoMoves.peekLast() != null;
+        this.undoMoves.peekLast().add(toAdd);
     }
 }

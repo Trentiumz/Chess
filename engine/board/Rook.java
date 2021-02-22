@@ -2,6 +2,7 @@ package engine.board;
 
 import engine.Tools;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Rook extends Piece {
@@ -17,24 +18,19 @@ public class Rook extends Piece {
     @Override
     protected void moveTo(int nx, int ny) throws AbleToMoveException{
         Piece pieceAtPos = board.getPiece(nx, ny);
-        Move[] toAdd;
-        Move afterMove = null;
-        boolean toReset = !isMoved;
+        ArrayList<Move> toAdd = new ArrayList<>();
+        toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
 
         if (pieceAtPos != null)
             if (pieceAtPos.side == this.side)
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side...");
             else{
                 board.removePiece(pieceAtPos);
-                afterMove = new Move(Tools.Instruction.add, pieceAtPos, null);
+                toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
             }
 
-        toAdd = new Move[afterMove != null && toReset ? 3 : afterMove != null || toReset ? 2 : 1];
-        if(toReset)
-            toAdd[toAdd.length - 1] = new Move(Tools.Instruction.rookUnMoved, this, null);
-        if(afterMove != null)
-            toAdd[toReset ? toAdd.length - 2 : toAdd.length - 1] = afterMove;
-        toAdd[0] = new Move(Tools.Instruction.move, this, new int[]{boardx, boardy});
+        if(!isMoved)
+            toAdd.add(new Move(Tools.Instruction.rookUnMoved, this, null));
         board.addUndo(toAdd);
 
         this.boardx = nx;

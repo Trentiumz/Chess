@@ -3,6 +3,7 @@ package engine.board;
 import engine.Tools;
 import engine.Tools.Side;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Pawn extends Piece {
@@ -27,31 +28,25 @@ public class Pawn extends Piece {
     @Override
     protected void moveTo(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
-        Move afterMove = null;
+        ArrayList<Move> toAdd = new ArrayList<>();
+        toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
         if (pieceAtPos != null){
             board.removePiece(pieceAtPos);
-            afterMove = new Move(Tools.Instruction.add, pieceAtPos, null);
+            toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
         }
         else if (board.enPassant != null && board.enPassant.boardx == nx && this.boardx != board.enPassant.boardx){
             board.removePiece(board.enPassant);
-            afterMove = new Move(Tools.Instruction.add, board.enPassant, null);
+            toAdd.add(new Move(Tools.Instruction.add, board.enPassant, null));
         }
         else if (Math.abs(ny - boardy) == 2){
             board.pawnEnPassant(this);
-            afterMove = new Move(Tools.Instruction.resetEnPassant, null, null);
+            toAdd.add(new Move(Tools.Instruction.resetEnPassant, null, null));
         }
         if (ny == 0 || ny == 7){
             board.atEnd = this;
-            afterMove = new Move(Tools.Instruction.resetAtEnd, null, null);
+            toAdd.add(new Move(Tools.Instruction.resetAtEnd, null, null));
         }
 
-        Move[] toAdd;
-        if(afterMove != null){
-            toAdd = new Move[2];
-            toAdd[1] = afterMove;
-        }else
-            toAdd = new Move[1];
-        toAdd[0] = new Move(Tools.Instruction.move, this, new int[]{boardx, boardy});
         board.addUndo(toAdd);
 
         this.boardx = nx;

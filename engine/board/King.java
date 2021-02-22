@@ -3,6 +3,7 @@ package engine.board;
 import engine.Tools;
 import engine.Tools.Side;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class King extends Piece {
@@ -17,15 +18,14 @@ public class King extends Piece {
     // MOVING
 
     protected void moveTo(int nx, int ny) throws AbleToMoveException {
-        Move afterMove = null;
-        boolean toReset = !didMove;
-        Move[] toAdd;
+        ArrayList<Move> toAdd = new ArrayList<>();
+        toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
 
         if (Math.abs(nx - boardx) == 2) {
             int rx = nx > boardx ? 7 : 0;
             Piece r = board.getPiece(rx, boardy);
             board.getPiece(rx, boardy).boardx = nx > boardx ? 5 : 3;
-            afterMove = new Move(Tools.Instruction.move, r, new int[] {rx, boardy});
+            toAdd.add(new Move(Tools.Instruction.move, r, new int[] {rx, boardy}));
         }
         Piece pieceAtPos = board.getPiece(nx, ny);
         if (pieceAtPos != null)
@@ -33,15 +33,11 @@ public class King extends Piece {
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side...");
             else{
                 board.removePiece(pieceAtPos);
-                afterMove = new Move(Tools.Instruction.add, pieceAtPos, null);
+                toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
             }
 
-        toAdd = new Move[toReset && afterMove != null ? 3 : toReset || afterMove != null ? 2 : 1];
-        if(toReset)
-            toAdd[toAdd.length - 1] = new Move(Tools.Instruction.kingUnMoved, this, null);
-        if(afterMove != null)
-            toAdd[toReset ? toAdd.length - 2 : toAdd.length - 1] = afterMove;
-        toAdd[0] = new Move(Tools.Instruction.move, this, new int[]{boardx, boardy});
+        if(!didMove)
+            toAdd.add(new Move(Tools.Instruction.kingUnMoved, this, null));
 
         board.addUndo(toAdd);
 

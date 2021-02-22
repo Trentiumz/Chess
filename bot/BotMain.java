@@ -70,7 +70,6 @@ public class BotMain {
             this.moves[i] = moves[i];
             executor.execute(toRuns[i]);
         }
-        System.out.println(evals);
 
         executor.shutdown();
         if(!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS)){
@@ -81,13 +80,11 @@ public class BotMain {
         int[][] bestMove = {null, null};
         for(int i = 0; i < evals; ++i){
             int lowestRating = -toRuns[i].getResult();
-            System.out.print(lowestRating + " ");
             if(lowestRating > best){
                 best = lowestRating;
                 bestMove = this.moves[i];
             }
         }
-        System.out.println();
         return bestMove;
     }
 }
