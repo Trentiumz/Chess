@@ -47,7 +47,9 @@ class Evaluator implements Runnable {
 
         for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
             Board copy = board.copy();
-            copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
+            if(!copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
+                System.out.println("Copy failed to move");
+            }
             copy.nextMove();
             if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
                 copy.enPassant = null;
