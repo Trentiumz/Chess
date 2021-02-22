@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Board implements Copyable {
 
-    final Collection<Piece> pieces;
+    public final Collection<Piece> pieces;
     King whiteKing;
     King blackKing;
     public Tools.Side currentMove;
@@ -25,11 +25,12 @@ public class Board implements Copyable {
      * These are all numbers corresponding to the enums of Tools.Instruction & Tools.Piece
      * The moves are also in chronological order; we undo by doing the last instruction first
      */
-    private final Deque<ArrayList<Move>> undoMoves = new ArrayDeque<>();
+    public final Deque<ArrayList<Move>> undoMoves;
 
 
     public Board() {
         pieces = new ArrayList<>();
+        undoMoves = new ArrayDeque<>();
     }
 
 
@@ -47,10 +48,11 @@ public class Board implements Copyable {
         return piece.move(nx, ny);
     }
 
-    public void doMove(@NotNull Piece piece, int[] instruction) {
-        movePiece(piece, instruction[0], instruction[1]);
+    public boolean doMove(@NotNull Piece piece, int[] instruction) {
+        boolean toreturn = movePiece(piece, instruction[0], instruction[1]);
         if (piece == atEnd)
             atEnd.promote(Tools.promotionOrder[instruction[2]]);
+        return toreturn;
     }
 
 
@@ -111,6 +113,12 @@ public class Board implements Copyable {
             }
         }
         currentMove = opposite();
+        --moveNum;
+    }
+
+    public void nextMove(){
+        currentMove = opposite();
+        ++moveNum;
     }
 
 
@@ -281,5 +289,9 @@ public class Board implements Copyable {
     public void addUndoMove(Move toAdd){
         assert this.undoMoves.peekLast() != null;
         this.undoMoves.peekLast().add(toAdd);
+    }
+
+    public int getUndoQueueSize(){
+        return this.undoMoves.size();
     }
 }
