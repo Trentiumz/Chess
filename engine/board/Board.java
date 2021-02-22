@@ -1,8 +1,8 @@
 package engine.board;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 
+import bot.InvalidSideException;
 import engine.Tools;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,14 +17,16 @@ public class Board implements Copyable {
     public Pawn enPassant;
 
     int moveNum = 0;
-    public static HashMap<Tools.Piece, Integer> scores = new HashMap<>() {{
-        put(Tools.Piece.queen, 100);
-        put(Tools.Piece.king, 900);
-        put(Tools.Piece.rook, 50);
-        put(Tools.Piece.bishop, 30);
-        put(Tools.Piece.knight, 30);
-        put(Tools.Piece.pawn, 10);
-    }};
+
+    // THIS IS THE STACK FOR UNDOING
+    /**
+     * {command}
+     * if there's a piece, then we have {command, piece}
+     * These are all numbers corresponding to the enums of Tools.Instruction & Tools.Piece
+     * The moves are also in chronological order; we undo by doing the last instruction first
+     */
+    private final Deque<Move[]> undoMoves = new ArrayDeque<>();
+
 
     public Board() {
         pieces = new ArrayList<>();
@@ -86,6 +88,25 @@ public class Board implements Copyable {
             case White -> this.whiteKing = king;
             case Black -> this.blackKing = king;
         }
+    }
+
+    public void undoLatest(Tools.Side side) throws InvalidSideException {
+        if(currentMove == side)
+            throw new InvalidSideException("The one who called to undo is currently supposed to move " + side + " " + currentMove);
+        Move[] last = undoMoves.removeLast();
+        for(int i = last.length - 1; i >= 0; --i){
+            Move m = last[i];
+            switch(m.instruction){
+                case move -> m.piece.setPosition(m.coords[0], m.coords[1]);
+                case add -> addPiece(m.piece);
+                case remove -> removePiece(m.piece);
+                case kingUnMoved -> ((King) m.piece).didMove = false;
+                case rookUnMoved -> ((Rook) m.piece).isMoved = false;
+                case resetEnPassant -> enPassant = null;
+                case resetAtEnd -> atEnd = null;
+            }
+        }
+        currentMove = opposite();
     }
 
 
@@ -247,5 +268,9 @@ public class Board implements Copyable {
             return Tools.Result.Draw;
         }
         return null;
+    }
+
+    public void addUndo(Move[] move){
+        undoMoves.add(move);
     }
 }

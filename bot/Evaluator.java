@@ -34,7 +34,7 @@ class Evaluator implements Runnable {
 
         int highestForcedRating = Integer.MIN_VALUE;
 
-        for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i > 0; --i) {
+        for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
             Board copy = board.copy();
             copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
             copy.currentMove = copy.opposite();

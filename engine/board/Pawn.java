@@ -27,16 +27,35 @@ public class Pawn extends Piece {
     @Override
     protected void moveTo(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
-        if (pieceAtPos != null)
+        Move afterMove = null;
+        if (pieceAtPos != null){
             board.removePiece(pieceAtPos);
-        else if (board.enPassant != null && board.enPassant.boardx == nx && this.boardx != board.enPassant.boardx)
+            afterMove = new Move(Tools.Instruction.add, pieceAtPos, null);
+        }
+        else if (board.enPassant != null && board.enPassant.boardx == nx && this.boardx != board.enPassant.boardx){
             board.removePiece(board.enPassant);
-        else if (Math.abs(ny - boardy) == 2)
+            afterMove = new Move(Tools.Instruction.add, board.enPassant, null);
+        }
+        else if (Math.abs(ny - boardy) == 2){
             board.pawnEnPassant(this);
+            afterMove = new Move(Tools.Instruction.resetEnPassant, null, null);
+        }
+        if (ny == 0 || ny == 7){
+            board.atEnd = this;
+            afterMove = new Move(Tools.Instruction.resetAtEnd, null, null);
+        }
+
+        Move[] toAdd;
+        if(afterMove != null){
+            toAdd = new Move[2];
+            toAdd[1] = afterMove;
+        }else
+            toAdd = new Move[1];
+        toAdd[0] = new Move(Tools.Instruction.move, this, new int[]{boardx, boardy});
+        board.addUndo(toAdd);
+
         this.boardx = nx;
         this.boardy = ny;
-        if (this.boardy == 0 || this.boardy == 7)
-            board.atEnd = this;
     }
 
 

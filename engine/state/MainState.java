@@ -57,6 +57,9 @@ public class MainState implements State{
 
     @Override
     public void keyPressed(char key) {
-
+        if(key == 'z'){
+            board.board.undoLatest(Tools.opposite(playerSide));
+            board.board.undoLatest(playerSide);
+        }
     }
 }

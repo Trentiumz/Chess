@@ -34,6 +34,11 @@ public class Tools {
         WhiteWon, BlackWon, Draw
     }
 
+    // Commands for undoing
+    public enum Instruction{
+        move, add, remove, kingUnMoved, rookUnMoved, resetEnPassant, resetAtEnd
+    }
+
 
     // HAS THE PROMOTION ORDER
     public static final Tools.Piece[] promotionOrder = {Tools.Piece.queen, Tools.Piece.rook, Tools.Piece.bishop, Tools.Piece.knight};

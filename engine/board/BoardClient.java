@@ -163,10 +163,13 @@ public class BoardClient {
 
         // If selectedPiece != null, then we move the piece
         if (selectedPiece != null) {
+            // TODO Fix the enPassant bug; when you double forward the pawn, ai moves, then you click the pawn and click out, the enPassant gets removed
+            // TODO somehow make it so that when a piece stops being enPassant, that the undo makes it an enPassant again
             if (board.enPassant != null && board.enPassant.side == board.currentMove)
                 board.enPassant = null;
-            if (board.movePiece(selectedPiece, x, y) && board.atEnd == null)
+            if (board.movePiece(selectedPiece, x, y) && board.atEnd == null){
                 nextMove();
+            }
             else
                 selectedPiece = null;
             if (board.atEnd != null) {
