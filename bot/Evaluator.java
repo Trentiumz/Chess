@@ -2,8 +2,12 @@ package bot;
 
 import engine.Tools;
 import engine.board.Board;
+import engine.board.Move;
+import engine.board.Pawn;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 
 class Evaluator implements Runnable {
 
@@ -29,15 +33,24 @@ class Evaluator implements Runnable {
         if (layers <= 0)
             return board.rating();
         int[][][] moves = board.getMoves(currentSide);
+        Pawn p = board.enPassant;
+        for(int i = 0; i < moves.length; ++i){
+            moves[i] = new int[][]{moves[i][0], moves[i][1], new int[]{getRating(moves[i], board, currentSide)}};
+            if((p != null) == (board.enPassant == null)){
+                System.out.println("en Passant changed");
+            }
+        }
         // Comparator: Positive if order is a -> b; negative if order is b -> a
-        Arrays.sort(moves, (int[][] a, int[][] b) -> compareBoards(a, b, board));
+        Arrays.sort(moves, Comparator.comparingInt((int[][] a) -> a[2][0]));
 
         int highestForcedRating = Integer.MIN_VALUE;
 
         for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
             Board copy = board.copy();
             copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
-            copy.currentMove = copy.opposite();
+            copy.nextMove();
+            if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
+                copy.enPassant = null;
             // The highest rating that the other player can get, then the negative, is the worst possible rating for this
             int worstCase = -ratingBounds(layers - 1, Tools.opposite(currentSide), copy);
             highestForcedRating = Math.max(worstCase, highestForcedRating);
@@ -50,25 +63,18 @@ class Evaluator implements Runnable {
         return result;
     }
 
+    // DEBUGGING
+    static ArrayList<Move> lastM;
 
-    /**
-     * Compares two moves to see which one has a higher rating - search depth of 1
-     *
-     * @param a     the first move
-     * @param b     the second move
-     * @param board the board that the move is acted on
-     * @return returns something >1 if move a is better; something <1 if move b is better; 0 if they're equal - it uses Integer.compare()
-     */
-    public static int compareBoards(int[][] a, int[][] b, Board board) {
-        Board first = board.copy();
-        first.doMove(first.getPiece(a[0][0], a[0][1]), a[1]);
-
-        Board second = board.copy();
-        second.doMove(second.getPiece(b[0][0], b[0][1]), b[1]);
-
-        int fr = first.rating();
-        int sr = second.rating();
-        return Integer.compare(fr, sr);
+    public static int getRating(int[][] move, Board board, Tools.Side currentSide){
+        if(!board.doMove(board.getPiece(move[0][0], move[0][1]), move[1])){
+            System.out.println("oop board failed move");
+        }
+        int fr = board.rating();
+        board.nextMove();
+        lastM = board.undoMoves.peekLast();
+        board.undoLatest(currentSide);
+        return fr;
     }
 
 }

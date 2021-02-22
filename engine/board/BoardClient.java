@@ -62,8 +62,7 @@ public class BoardClient {
      * update the move so that it's the next player's turn
      */
     private void nextMove() {
-        board.currentMove = board.opposite();
-        ++board.moveNum;
+        board.nextMove();
         selectedPiece = null;
 
     }
@@ -92,7 +91,8 @@ public class BoardClient {
                     board.enPassant = null;
 
                 if (board.movePiece(selectedPiece, x, y)){
-                    board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
+                    if(thePassant != null)
+                        board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
                     if(board.atEnd == null)
                         nextMove();
                 }
