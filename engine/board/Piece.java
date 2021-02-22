@@ -56,8 +56,6 @@ public abstract class Piece implements Copyable {
             if (pieceAtPos.side == this.side)
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side... ");
             else{
-                if(pieceAtPos == board.enPassant)
-                    toAdd.add(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
                 board.removePiece(pieceAtPos);
                 toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
             }

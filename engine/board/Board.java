@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Board implements Copyable {
 
-    public final Collection<Piece> pieces;
+    final Collection<Piece> pieces;
     King whiteKing;
     King blackKing;
     public Tools.Side currentMove;
@@ -25,12 +25,11 @@ public class Board implements Copyable {
      * These are all numbers corresponding to the enums of Tools.Instruction & Tools.Piece
      * The moves are also in chronological order; we undo by doing the last instruction first
      */
-    public final Deque<ArrayList<Move>> undoMoves;
+    private final Deque<ArrayList<Move>> undoMoves = new ArrayDeque<>();
 
 
     public Board() {
         pieces = new ArrayList<>();
-        undoMoves = new ArrayDeque<>();
     }
 
 
@@ -48,11 +47,10 @@ public class Board implements Copyable {
         return piece.move(nx, ny);
     }
 
-    public boolean doMove(@NotNull Piece piece, int[] instruction) {
-        boolean toreturn = movePiece(piece, instruction[0], instruction[1]);
+    public void doMove(@NotNull Piece piece, int[] instruction) {
+        movePiece(piece, instruction[0], instruction[1]);
         if (piece == atEnd)
             atEnd.promote(Tools.promotionOrder[instruction[2]]);
-        return toreturn;
     }
 
 
@@ -72,12 +70,10 @@ public class Board implements Copyable {
 
     public void removePiece(Piece toremove) {
         pieces.remove(toremove);
-        if(enPassant == toremove){
+        if(enPassant == toremove)
             enPassant = null;
-        }
-        if(atEnd == toremove){
+        if(atEnd == toremove)
             atEnd = null;
-        }
     }
 
     public void addPiece(Piece piece) {
@@ -115,12 +111,6 @@ public class Board implements Copyable {
             }
         }
         currentMove = opposite();
-        --moveNum;
-    }
-
-    public void nextMove(){
-        currentMove = opposite();
-        ++moveNum;
     }
 
 
@@ -291,9 +281,5 @@ public class Board implements Copyable {
     public void addUndoMove(Move toAdd){
         assert this.undoMoves.peekLast() != null;
         this.undoMoves.peekLast().add(toAdd);
-    }
-
-    public int getUndoQueueSize(){
-        return this.undoMoves.size();
     }
 }

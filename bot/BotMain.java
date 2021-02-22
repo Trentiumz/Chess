@@ -5,7 +5,6 @@ import engine.board.Board;
 import engine.board.BoardClient;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -58,24 +57,18 @@ public class BotMain {
      */
     private int[][] getMove() throws InterruptedException, TimeoutException {
         int[][][] moves = board.board.getMoves(botSide);
-        for(int i = 0; i < moves.length; ++i){
-            moves[i] = new int[][]{moves[i][0], moves[i][1], new int[]{Evaluator.getRating(moves[i], board.board, botSide)}};
-        }
-        Arrays.sort(moves, Comparator.comparingInt((int[][] a) -> -a[2][0]));
+        // Lowest index = highest rating
+        Arrays.sort(moves, (int[][] a, int[][] b) -> Evaluator.compareBoards(b, a, board.board));
 
         int evals = Math.min(toRuns.length, moves.length);
         ExecutorService executor = Executors.newFixedThreadPool(evals);
         for (int i = 0; i < evals; ++i) {
             Board copy = board.board.copy();
             copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
-            copy.nextMove();
-            if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
-                copy.enPassant = null;
-
+            copy.currentMove = copy.opposite();
             toRuns[i] = new Evaluator(layers - 1, Tools.opposite(botSide), movesPerLayer, copy);
             this.moves[i] = moves[i];
-            toRuns[i].run();
-            // executor.execute(toRuns[i]);
+            executor.execute(toRuns[i]);
         }
 
         executor.shutdown();

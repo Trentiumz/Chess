@@ -31,24 +31,20 @@ public class Pawn extends Piece {
         ArrayList<Move> toAdd = new ArrayList<>();
         toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
         if (pieceAtPos != null){
-            if(pieceAtPos == board.enPassant)
-                toAdd.add(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
             board.removePiece(pieceAtPos);
             toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
         }
         else if (board.enPassant != null && board.enPassant.boardx == nx && this.boardx != board.enPassant.boardx){
-            Pawn thePassant = board.enPassant;
             board.removePiece(board.enPassant);
-            toAdd.add(new Move(Tools.Instruction.add, thePassant, null));
-            toAdd.add(new Move(Tools.Instruction.setEnPassant, thePassant, null));
+            toAdd.add(new Move(Tools.Instruction.add, board.enPassant, null));
         }
         else if (Math.abs(ny - boardy) == 2){
-            toAdd.add(new Move(Tools.Instruction.setEnPassant, board.enPassant, null));
             board.pawnEnPassant(this);
+            toAdd.add(new Move(Tools.Instruction.resetEnPassant, null, null));
         }
         if (ny == 0 || ny == 7){
-            toAdd.add(new Move(Tools.Instruction.setAtEnd, board.atEnd, null));
             board.atEnd = this;
+            toAdd.add(new Move(Tools.Instruction.resetAtEnd, null, null));
         }
 
         board.addUndo(toAdd);
