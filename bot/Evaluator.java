@@ -47,9 +47,10 @@ class Evaluator implements Runnable {
 
         for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
             Board copy = board.copy();
-            if(!copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
+            if(!copy.canDoMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
                 System.out.println("Copy failed to move");
             }
+            copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
             copy.nextMove();
             if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
                 copy.enPassant = null;
@@ -69,9 +70,10 @@ class Evaluator implements Runnable {
     static ArrayList<Move> lastM;
 
     public static int getRating(int[][] move, Board board, Tools.Side currentSide){
-        if(!board.doMove(board.getPiece(move[0][0], move[0][1]), move[1])){
+        if(!board.canDoMove(board.getPiece(move[0][0], move[0][1]), move[1])){
             System.out.println("oop board failed move");
         }
+        board.doMove(board.getPiece(move[0][0], move[0][1]), move[1]);
         int fr = board.rating();
         board.nextMove();
         lastM = board.undoMoves.peekLast();

@@ -42,17 +42,23 @@ public class Board implements Copyable {
      * @param piece the piece to be moved
      * @param nx    the next x coordinate
      * @param ny    the next y coordinate
-     * @return true if the piece was successful in moving, false if that move wasn't valid
      */
-    public boolean movePiece(@NotNull Piece piece, int nx, int ny) {
-        return piece.move(nx, ny);
+    public void movePiece(@NotNull Piece piece, int nx, int ny) {
+        piece.move(nx, ny);
     }
 
-    public boolean doMove(@NotNull Piece piece, int[] instruction) {
-        boolean toreturn = movePiece(piece, instruction[0], instruction[1]);
+    public boolean canMove(Piece piece, int nx, int ny){
+        return piece.canMoveTo(nx, ny);
+    }
+
+    public boolean canDoMove(@NotNull Piece piece, int[] instruction){
+        return canMove(piece, instruction[0], instruction[1]);
+    }
+
+    public void doMove(@NotNull Piece piece, int[] instruction) {
+        movePiece(piece, instruction[0], instruction[1]);
         if (piece == atEnd)
             atEnd.promote(Tools.promotionOrder[instruction[2]]);
-        return toreturn;
     }
 
 

@@ -16,7 +16,7 @@ public class Rook extends Piece {
     // MOVING
 
     @Override
-    protected void moveTo(int nx, int ny) throws AbleToMoveException{
+    protected void move(int nx, int ny) throws AbleToMoveException{
         Piece pieceAtPos = board.getPiece(nx, ny);
         ArrayList<Move> toAdd = new ArrayList<>();
         toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));

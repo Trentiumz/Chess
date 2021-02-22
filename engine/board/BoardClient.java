@@ -86,22 +86,21 @@ public class BoardClient {
 
             // If selectedPiece != null, then we move the piece
             if (selectedPiece != null) {
-                Pawn thePassant = board.enPassant;
-                if (thePassant != null && board.enPassant.side == board.currentMove)
-                    board.enPassant = null;
-
-                if (board.movePiece(selectedPiece, x, y)){
-                    if(thePassant != null)
-                        board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
-                    if(board.atEnd == null)
-                        nextMove();
-                }
-                else{
+                if(!board.canMove(selectedPiece, x, y))
                     selectedPiece = null;
-                    board.enPassant = thePassant;
-                }
-                if (board.atEnd != null) {
-                    currentState = promotionState;
+                else {
+                    Pawn thePassant = board.enPassant;
+                    if (thePassant != null && board.enPassant.side == board.currentMove)
+                        board.enPassant = null;
+
+                    board.movePiece(selectedPiece, x, y);
+                    if (thePassant != null)
+                        board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
+                    if (board.atEnd == null)
+                        nextMove();
+                    if (board.atEnd != null) {
+                        currentState = promotionState;
+                    }
                 }
             } else {
                 // Get the piece at the cell, and select it

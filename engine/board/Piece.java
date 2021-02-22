@@ -23,22 +23,8 @@ public abstract class Piece implements Copyable {
 
     // HANDLING MOVING THE PIECE
 
-    /**
-     * If possible, move the piece to the designated square and return true. If it isn't possible, then return false
-     *
-     * @param nx wanted cell x coordinate
-     * @param ny wanted cell y coordinate
-     * @throws AbleToMoveException this occurs when the piece is able to "eat" a piece on its own side
-     * @implNote This is generally more useful for the client/human player, as the main difference is that it returns
-     * a boolean based on whether or not the move even happened
-     */
-    public boolean move(int nx, int ny) throws AbleToMoveException {
-        if (canMove().contains(Tools.toNum(nx, ny))) {
-            moveTo(nx, ny);
-            return true;
-        } else {
-            return false;
-        }
+    public boolean canMoveTo(int nx, int ny){
+        return canMove().contains(Tools.toNum(nx, ny));
     }
 
     /**
@@ -47,8 +33,9 @@ public abstract class Piece implements Copyable {
      * @param nx Target x coordinate
      * @param ny Target y coordinate
      * @throws AbleToMoveException This piece should never(even in simulations) go on top of another piece of its side
+     * @implNote there is undefined behavior if the move isn't valid; use canMoveTo to see if you can even move there
      */
-    protected void moveTo(int nx, int ny) throws AbleToMoveException {
+    protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
         ArrayList<Move> toAdd = new ArrayList<>();
         toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
@@ -92,7 +79,7 @@ public abstract class Piece implements Copyable {
         for (Integer number : toreturn) {
             Board pseudoBoard = board.copy();
             Piece self = pseudoBoard.getPiece(boardx, boardy);
-            self.moveTo(Tools.getX(number), Tools.getY(number));
+            self.move(Tools.getX(number), Tools.getY(number));
             if (pseudoBoard.inCheck(side))
                 toremove.add(number);
         }

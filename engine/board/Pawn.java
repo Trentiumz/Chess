@@ -16,17 +16,7 @@ public class Pawn extends Piece {
     // MOVING
 
     @Override
-    public boolean move(int nx, int ny) throws AbleToMoveException {
-        if (canMove().contains(Tools.toNum(nx, ny))) {
-            moveTo(nx, ny);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    protected void moveTo(int nx, int ny) throws AbleToMoveException {
+    protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
         ArrayList<Move> toAdd = new ArrayList<>();
         toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));

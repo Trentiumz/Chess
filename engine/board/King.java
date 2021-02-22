@@ -17,7 +17,7 @@ public class King extends Piece {
 
     // MOVING
 
-    protected void moveTo(int nx, int ny) throws AbleToMoveException {
+    public void move(int nx, int ny) throws AbleToMoveException {
         ArrayList<Move> toAdd = new ArrayList<>();
         toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
 
