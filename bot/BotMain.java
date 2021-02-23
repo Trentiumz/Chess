@@ -74,8 +74,7 @@ public class BotMain {
 
             toRuns[i] = new Evaluator(layers - 1, Tools.opposite(botSide), movesPerLayer, copy);
             this.moves[i] = moves[i];
-            toRuns[i].run();
-            // executor.execute(toRuns[i]);
+            executor.execute(toRuns[i]);
         }
 
         executor.shutdown();
