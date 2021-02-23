@@ -47,3 +47,6 @@ Inside the sprites folder, you'll see various sprites that are used for renderin
 
 Inside the botAssist/positionRatings folder, you'll see various files that just store information on the rating change to apply for various position for various pieces. This 
 will help the bot make decisions based not solely on piece value, but also on how valuable they are in a specific position. 
+
+# Current Progress
+Currently, I'm working on being able to undo my moves; this isn't just something that will make the experience more complete for the player, but is essential for the bot to improve. Most minimax algorithms work by simulating each possibility; and currently; I'm doing that by creating a copy of the board and making a move on that copy. This is highly inefficient, but by undoing my moves, I'm able to simulate the move, get the required information and undo the move. 
