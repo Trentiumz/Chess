@@ -47,6 +47,11 @@ public class Board implements Copyable {
      */
     public void movePiece(@NotNull Piece piece, int nx, int ny) {
         undoMoves.add(new ArrayList<>());
+        if(this.enPassant != null && this.enPassant.side == currentMove){
+            assert undoMoves.peekLast() != null;
+            undoMoves.peekLast().add(new Move(Tools.Instruction.setEnPassant, enPassant, null));
+            enPassant = null;
+        }
         piece.move(nx, ny);
     }
 

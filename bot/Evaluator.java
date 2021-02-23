@@ -46,16 +46,14 @@ class Evaluator implements Runnable {
         int highestForcedRating = Integer.MIN_VALUE;
 
         for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
-            Board copy = board.copy();
-            if(!copy.canDoMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
+            if(!board.canDoMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
                 System.out.println("Copy failed to move");
             }
-            copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
-            copy.nextMove();
-            if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
-                copy.enPassant = null;
+            board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
+            board.nextMove();
             // The highest rating that the other player can get, then the negative, is the worst possible rating for this
-            int worstCase = -ratingBounds(layers - 1, Tools.opposite(currentSide), copy);
+            int worstCase = -ratingBounds(layers - 1, Tools.opposite(currentSide), board);
+            board.undoLatest(currentSide);
             highestForcedRating = Math.max(worstCase, highestForcedRating);
         }
 

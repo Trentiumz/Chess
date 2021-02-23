@@ -69,8 +69,6 @@ public class BotMain {
             Board copy = board.board.copy();
             copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
             copy.nextMove();
-            if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
-                copy.enPassant = null;
 
             toRuns[i] = new Evaluator(layers - 1, Tools.opposite(botSide), movesPerLayer, copy);
             this.moves[i] = moves[i];

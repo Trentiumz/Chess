@@ -89,13 +89,7 @@ public class BoardClient {
                 if(!board.canMove(selectedPiece, x, y))
                     selectedPiece = null;
                 else {
-                    Pawn thePassant = board.enPassant;
-                    if (thePassant != null && board.enPassant.side == board.currentMove)
-                        board.enPassant = null;
-
                     board.movePiece(selectedPiece, x, y);
-                    if (thePassant != null)
-                        board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
                     if (board.atEnd == null)
                         nextMove();
                     if (board.atEnd != null) {
