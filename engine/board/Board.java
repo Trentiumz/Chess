@@ -30,7 +30,9 @@ public class Board implements Copyable {
 
     public Board() {
         pieces = new ArrayList<>();
-        undoMoves = new ArrayDeque<>();
+        undoMoves = new ArrayDeque<>() {{
+            add(new ArrayList<>());
+        }};
     }
 
 
@@ -44,14 +46,15 @@ public class Board implements Copyable {
      * @param ny    the next y coordinate
      */
     public void movePiece(@NotNull Piece piece, int nx, int ny) {
+        undoMoves.add(new ArrayList<>());
         piece.move(nx, ny);
     }
 
-    public boolean canMove(Piece piece, int nx, int ny){
+    public boolean canMove(Piece piece, int nx, int ny) {
         return piece.canMoveTo(nx, ny);
     }
 
-    public boolean canDoMove(@NotNull Piece piece, int[] instruction){
+    public boolean canDoMove(@NotNull Piece piece, int[] instruction) {
         return canMove(piece, instruction[0], instruction[1]);
     }
 
@@ -78,9 +81,9 @@ public class Board implements Copyable {
 
     public void removePiece(Piece toremove) {
         pieces.remove(toremove);
-        if(enPassant == toremove)
+        if (enPassant == toremove)
             enPassant = null;
-        if(atEnd == toremove)
+        if (atEnd == toremove)
             atEnd = null;
     }
 
@@ -101,12 +104,12 @@ public class Board implements Copyable {
     }
 
     public void undoLatest(Tools.Side side) throws InvalidSideException {
-        if(currentMove == side)
+        if (currentMove == side)
             throw new InvalidSideException("The one who called to undo is currently supposed to move " + side + " " + currentMove);
         ArrayList<Move> last = undoMoves.removeLast();
-        for(int i = last.size() - 1; i >= 0; --i){
+        for (int i = last.size() - 1; i >= 0; --i) {
             Move m = last.get(i);
-            switch(m.instruction){
+            switch (m.instruction) {
                 case move -> m.piece.setPosition(m.coords[0], m.coords[1]);
                 case add -> addPiece(m.piece);
                 case remove -> removePiece(m.piece);
@@ -122,7 +125,7 @@ public class Board implements Copyable {
         --moveNum;
     }
 
-    public void nextMove(){
+    public void nextMove() {
         currentMove = opposite();
         ++moveNum;
     }
@@ -288,16 +291,16 @@ public class Board implements Copyable {
         return null;
     }
 
-    public void addUndo(ArrayList<Move> move){
+    public void addUndo(ArrayList<Move> move) {
         undoMoves.add(move);
     }
 
-    public void addUndoMove(Move toAdd){
+    public void addUndoMove(Move toAdd) {
         assert this.undoMoves.peekLast() != null;
         this.undoMoves.peekLast().add(toAdd);
     }
 
-    public int getUndoQueueSize(){
+    public int getUndoQueueSize() {
         return this.undoMoves.size();
     }
 }

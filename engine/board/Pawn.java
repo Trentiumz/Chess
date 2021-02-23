@@ -18,30 +18,28 @@ public class Pawn extends Piece {
     @Override
     protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
-        ArrayList<Move> toAdd = new ArrayList<>();
-        toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
         if (pieceAtPos != null){
             if(pieceAtPos == board.enPassant)
-                toAdd.add(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
+                board.addUndoMove(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
             board.removePiece(pieceAtPos);
-            toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
+            board.addUndoMove(new Move(Tools.Instruction.add, pieceAtPos, null));
         }
         else if (board.enPassant != null && board.enPassant.boardx == nx && this.boardx != board.enPassant.boardx){
             Pawn thePassant = board.enPassant;
             board.removePiece(board.enPassant);
-            toAdd.add(new Move(Tools.Instruction.add, thePassant, null));
-            toAdd.add(new Move(Tools.Instruction.setEnPassant, thePassant, null));
+            board.addUndoMove(new Move(Tools.Instruction.add, thePassant, null));
+            board.addUndoMove(new Move(Tools.Instruction.setEnPassant, thePassant, null));
         }
         else if (Math.abs(ny - boardy) == 2){
-            toAdd.add(new Move(Tools.Instruction.setEnPassant, board.enPassant, null));
+            board.addUndoMove(new Move(Tools.Instruction.setEnPassant, board.enPassant, null));
             board.pawnEnPassant(this);
         }
         if (ny == 0 || ny == 7){
-            toAdd.add(new Move(Tools.Instruction.setAtEnd, board.atEnd, null));
+            board.addUndoMove(new Move(Tools.Instruction.setAtEnd, board.atEnd, null));
             board.atEnd = this;
         }
 
-        board.addUndo(toAdd);
 
         this.boardx = nx;
         this.boardy = ny;

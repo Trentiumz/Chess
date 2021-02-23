@@ -18,14 +18,13 @@ public class King extends Piece {
     // MOVING
 
     public void move(int nx, int ny) throws AbleToMoveException {
-        ArrayList<Move> toAdd = new ArrayList<>();
-        toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
 
         if (Math.abs(nx - boardx) == 2) {
             int rx = nx > boardx ? 7 : 0;
             Piece r = board.getPiece(rx, boardy);
             board.getPiece(rx, boardy).boardx = nx > boardx ? 5 : 3;
-            toAdd.add(new Move(Tools.Instruction.move, r, new int[] {rx, boardy}));
+            board.addUndoMove(new Move(Tools.Instruction.move, r, new int[] {rx, boardy}));
         }
         Piece pieceAtPos = board.getPiece(nx, ny);
         if (pieceAtPos != null)
@@ -33,15 +32,13 @@ public class King extends Piece {
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side...");
             else{
                 if(pieceAtPos == board.enPassant)
-                    toAdd.add(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
+                    board.addUndoMove(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
                 board.removePiece(pieceAtPos);
-                toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
+                board.addUndoMove(new Move(Tools.Instruction.add, pieceAtPos, null));
             }
 
         if(!didMove)
-            toAdd.add(new Move(Tools.Instruction.kingUnMoved, this, null));
-
-        board.addUndo(toAdd);
+            board.addUndoMove(new Move(Tools.Instruction.kingUnMoved, this, null));
 
         this.boardx = nx;
         this.boardy = ny;
