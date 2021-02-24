@@ -18,7 +18,6 @@ public class Rook extends Piece {
     @Override
     protected void move(int nx, int ny) throws AbleToMoveException{
         Piece pieceAtPos = board.getPiece(nx, ny);
-        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
 
         if (pieceAtPos != null)
             if (pieceAtPos.side == this.side)
@@ -33,8 +32,8 @@ public class Rook extends Piece {
         if(!isMoved)
             board.addUndoMove(new Move(Tools.Instruction.rookUnMoved, this, null));
 
-        this.boardx = nx;
-        this.boardy = ny;
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
+        board.changePosition(this, nx, ny);
         this.isMoved = true;
     }
 

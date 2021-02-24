@@ -37,7 +37,6 @@ public abstract class Piece implements Copyable {
      */
     protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
-        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
         if (pieceAtPos != null)
             if (pieceAtPos.side == this.side)
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side... ");
@@ -48,8 +47,8 @@ public abstract class Piece implements Copyable {
                 board.addUndoMove(new Move(Tools.Instruction.add, pieceAtPos, null));
             }
 
-        this.boardx = nx;
-        this.boardy = ny;
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
+        board.changePosition(this, nx, ny);
     }
 
     /**

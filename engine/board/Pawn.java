@@ -39,7 +39,6 @@ public class Pawn extends Piece {
     @Override
     protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
-        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
         if (pieceAtPos != null){
             if(pieceAtPos == board.enPassant)
                 board.addUndoMove(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
@@ -60,10 +59,9 @@ public class Pawn extends Piece {
             board.addUndoMove(new Move(Tools.Instruction.setAtEnd, board.atEnd, null));
             board.atEnd = this;
         }
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
 
-
-        this.boardx = nx;
-        this.boardy = ny;
+        board.changePosition(this, nx, ny);
     }
 
 

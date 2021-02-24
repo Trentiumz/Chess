@@ -8,9 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class Board implements Copyable {
 
-    public final Collection<Piece> pieces;
-    // This one is temporary for when we're just trying to simulate the moves,
-    public Collection<Piece> piecesCopy;
+    public Piece[][] piecePositions = new Piece[8][8];
 
     King whiteKing;
     King blackKing;
@@ -34,7 +32,6 @@ public class Board implements Copyable {
 
 
     public Board() {
-        pieces = new ArrayList<>();
         undoMoves = new ArrayDeque<>() {{
             add(new ArrayList<>());
         }};
@@ -52,7 +49,7 @@ public class Board implements Copyable {
      */
     public void movePiece(@NotNull Piece piece, int nx, int ny) {
         undoMoves.add(new ArrayList<>());
-        if(this.enPassant != null && this.enPassant.side == currentMove){
+        if (this.enPassant != null && this.enPassant.side == currentMove) {
             assert undoMoves.peekLast() != null;
             undoMoves.peekLast().add(new Move(Tools.Instruction.setEnPassant, enPassant, null));
             enPassant = null;
@@ -89,21 +86,34 @@ public class Board implements Copyable {
         return toreturn;
     }
 
-    public void removePiece(Piece toremove) {
-        pieces.remove(toremove);
-        if (enPassant == toremove)
+    public void removePiece(int nx, int ny) {
+        Piece thePiece = piecePositions[nx][ny];
+        piecePositions[nx][ny] = null;
+        if (enPassant == thePiece)
             enPassant = null;
-        if (atEnd == toremove)
+        if (atEnd == thePiece)
             atEnd = null;
     }
 
-    public void addPiece(Piece piece) {
-        pieces.add(piece);
+    public void removePiece(Piece piece) {
+        removePiece(piece.boardx, piece.boardy);
+    }
+
+    public void addPiece(Piece piece) throws InvalidPieceException {
+        if (piecePositions[piece.boardx][piece.boardy] != null)
+            throw new InvalidPieceException("The piece at (" + piece.boardx + " " + piece.boardy + ") is occupied already - remove it first!");
+        piecePositions[piece.boardx][piece.boardy] = piece;
+    }
+
+    public void changePosition(Piece piece, int nx, int ny){
+        piecePositions[piece.boardx][piece.boardy] = null;
+        piecePositions[nx][ny] = piece;
+        piece.setPosition(nx, ny);
     }
 
     public void addKing(Tools.Side side, King king) {
         setKing(side, king);
-        this.pieces.add(king);
+        this.addPiece(king);
     }
 
     public void setKing(Tools.Side side, King king) {
@@ -120,7 +130,7 @@ public class Board implements Copyable {
         for (int i = last.size() - 1; i >= 0; --i) {
             Move m = last.get(i);
             switch (m.instruction) {
-                case move -> m.piece.setPosition(m.coords[0], m.coords[1]);
+                case move -> changePosition(m.piece, m.coords[0], m.coords[1]);
                 case add -> addPiece(m.piece);
                 case remove -> removePiece(m.piece);
                 case kingUnMoved -> ((King) m.piece).didMove = false;
@@ -137,11 +147,10 @@ public class Board implements Copyable {
 
     public void nextMove() {
         currentMove = opposite();
-        piecesCopy = new ArrayList<>(pieces);
         ++moveNum;
     }
 
-    public void initialize(){
+    public void initialize() {
         for (Tools.Side side : new Tools.Side[]{Tools.Side.Black, Tools.Side.White}) {
             int pawnLayer = side == Tools.Side.Black ? 1 : 6;
             int backLayer = side == Tools.Side.Black ? 0 : 7;
@@ -155,7 +164,6 @@ public class Board implements Copyable {
             addPiece(new Bishop(5, backLayer, side, this));
             addPiece(new Queen(3, backLayer, side, this));
         }
-        this.piecesCopy = new ArrayList<>(this.pieces);
         addKing(Tools.Side.White, new King(4, 7, Tools.Side.White, this));
         addKing(Tools.Side.Black, new King(4, 0, Tools.Side.Black, this));
         currentMove = Tools.Side.White;
@@ -172,12 +180,15 @@ public class Board implements Copyable {
      */
     public int rating(Tools.Side currentSide) {
         int rating = 0;
-        for (Piece p : pieces) {
-            if (p.side == currentSide)
-                rating += p.rating();
-            else
-                rating -= p.rating();
-        }
+        for (int x = 0; x < piecePositions.length; ++x)
+            for (int y = 0; y < piecePositions[x].length; ++y) {
+                if(getPiece(x, y) == null)
+                    continue;
+                if (getPiece(x, y).side == currentSide)
+                    rating += getPiece(x, y).rating();
+                else
+                    rating -= getPiece(x, y).rating();
+            }
         if (getBoardResult() == switch (currentSide) {
             case White -> Tools.Result.WhiteWon;
             case Black -> Tools.Result.BlackWon;
@@ -203,20 +214,20 @@ public class Board implements Copyable {
      */
     public int[][][] getMoves(Tools.Side side) {
         ArrayList<int[][]> possibleMoves = new ArrayList<>();
-        for (Piece p : piecesCopy) {
-            if (p.side == side) {
-                for (Integer finalCoord : p.canMove()) {
-                    int x = Tools.getX(finalCoord);
-                    int y = Tools.getY(finalCoord);
-                    if (p instanceof Pawn && (y == 0 || y == 7))
-                        // p is a pawn, and it's gonna reach the end; so we gotta promote it
-                        for (int i = 0; i < 4; ++i)
-                            possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y, i}});
-                    else
-                        possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y}});
-                }
-            }
-        }
+        Arrays.stream(piecePositions).forEach(column -> Arrays.stream(column).forEach(p -> {
+           if(p != null && p.side == side){
+               for (Integer finalCoord : p.canMove()) {
+                   int x = Tools.getX(finalCoord);
+                   int y = Tools.getY(finalCoord);
+                   if (p instanceof Pawn && (y == 0 || y == 7))
+                       // p is a pawn, and it's gonna reach the end; so we gotta promote it
+                       for (int i = 0; i < 4; ++i)
+                           possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y, i}});
+                   else
+                       possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y}});
+               }
+           }
+        }));
         int[][][] toreturn = new int[possibleMoves.size()][2][];
         for (int i = 0; i < possibleMoves.size(); ++i)
             toreturn[i] = possibleMoves.get(i);
@@ -224,10 +235,12 @@ public class Board implements Copyable {
     }
 
     public boolean isRookMoved(int x, int y) {
-        for (Piece piece : pieces) {
-            if (piece.boardx == x && piece.boardy == y && piece instanceof Rook)
-                return ((Rook) piece).isMoved;
-        }
+        for(Piece[] column : piecePositions)
+            for(Piece piece : column){
+                if(piece == null) continue;
+                if (piece.boardx == x && piece.boardy == y && piece instanceof Rook)
+                    return ((Rook) piece).isMoved;
+            }
         return false;
     }
 
@@ -247,20 +260,26 @@ public class Board implements Copyable {
     }
 
     public boolean otherSideCanGet(Tools.Side side, int x, int y) {
-        boolean isChecked = false;
-        for (Piece piece : pieces)
-            if (piece.side != side && piece.capturableSpaces().contains(Tools.toNum(x, y))) {
-                isChecked = true;
-                break;
+        for(Piece[] column : piecePositions)
+            for(Piece piece : column){
+                if(piece == null) continue;
+                if (piece.side != side && piece.capturableSpaces().contains(Tools.toNum(x, y))) {
+                    return true;
+                }
             }
-        return isChecked;
+
+        return false;
     }
 
     public Board copy() {
         Board toreturn = new Board();
-        for (Piece p : pieces)
-            if (p != whiteKing && p != blackKing && p != atEnd && p != enPassant)
-                toreturn.addPiece(p.copy());
+        for(int x = 0; x < 8; ++x)
+            for(int y = 0; y < 8; ++y){
+                Piece p = piecePositions[x][y];
+                if(p == null) continue;
+                if (p != whiteKing && p != blackKing && p != atEnd && p != enPassant)
+                    toreturn.addPiece(p.copy());
+            }
         toreturn.addKing(Tools.Side.White, whiteKing.copy());
         toreturn.addKing(Tools.Side.Black, blackKing.copy());
         toreturn.currentMove = currentMove;
@@ -272,8 +291,11 @@ public class Board implements Copyable {
             toreturn.enPassant = enPassant.copy();
             toreturn.addPiece(toreturn.enPassant);
         }
-        for (Piece p : toreturn.pieces)
-            p.board = toreturn;
+        for(Piece[] column : toreturn.piecePositions)
+            for(Piece p : column) {
+                if (p == null) continue;
+                p.board = toreturn;
+            }
         return toreturn;
     }
 
@@ -297,26 +319,30 @@ public class Board implements Copyable {
      * @return the piece at (x,y), or null if no piece exists
      */
     public Piece getPiece(int x, int y) {
-        for (Piece piece : pieces)
-            if (piece.boardx == x && piece.boardy == y)
-                return piece;
-        return null;
+        if(x < 0 || x >= 8 || y < 0 || y >= 8)
+            return null;
+        return piecePositions[x][y];
     }
 
     public Tools.Result getBoardResult() {
         // If the other side doesn't have any moves
         boolean otherSideHasMoves = false;
-        for (Piece piece : this.piecesCopy)
-            if (piece.side == this.currentMove && piece.canMove().size() > 0) {
-                otherSideHasMoves = true;
-                break;
+        for(Piece[] column : piecePositions)
+            for(Piece piece : column) {
+                if (piece == null) continue;
+                if (piece.side == this.currentMove && piece.canMove().size() > 0) {
+                    otherSideHasMoves = true;
+                    break;
+                }
             }
         if (!otherSideHasMoves) {
             // Then we see if the king is in check
             King otherKing = this.getKing(this.currentMove);
-            for (Piece piece : this.pieces)
-                if (piece.side == this.opposite() && piece.possibleMoves().contains(Tools.toNum(otherKing.boardx, otherKing.boardy)))
-                    return this.currentMove == Tools.Side.Black ? Tools.Result.WhiteWon : Tools.Result.BlackWon;
+            for(Piece[] column : piecePositions)
+                for(Piece piece : column) {
+                    if (piece != null && piece.side == this.opposite() && piece.possibleMoves().contains(Tools.toNum(otherKing.boardx, otherKing.boardy)))
+                        return this.currentMove == Tools.Side.Black ? Tools.Result.WhiteWon : Tools.Result.BlackWon;
+                }
             return Tools.Result.Draw;
         }
         return null;
@@ -325,6 +351,17 @@ public class Board implements Copyable {
     public void addUndoMove(Move toAdd) {
         assert this.undoMoves.peekLast() != null;
         this.undoMoves.peekLast().add(toAdd);
+    }
+
+    /**
+     * A debugging render, just to simplify seeing what the ai is thinking on the screen
+     */
+    public void render(){
+        for(Piece[] column : piecePositions)
+            for(Piece piece : column) {
+                if (piece == null) continue;
+                piece.render();
+            }
     }
 
 }

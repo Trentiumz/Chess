@@ -115,12 +115,19 @@ public class BoardClient {
         }
 
         public synchronized void render() {
+            render(board);
+        }
+
+        public void render(Board toRender){
             Tools.drawImage(Tools.getSprite(Tools.Sprite.board), 0, 0);
-            for (Piece piece : board.pieces)
-                if (piece != selectedPiece)
-                    piece.render();
-                else
-                    piece.renderSelected();
+            for(Piece[] column : toRender.piecePositions)
+                for(Piece piece : column) {
+                    if (piece == null) continue;
+                    if (piece != selectedPiece)
+                        piece.render();
+                    else
+                        piece.renderSelected();
+                }
             if (selectedPiece != null)
                 for (Integer c : selectedPiece.canMove())
                     Tools.drawCircle(Tools.getX(c) * Main.CELL_SIZE + Main.CELL_SIZE / 2, Tools.getY(c) * Main.CELL_SIZE + Main.CELL_SIZE / 2, Main.CELL_SIZE / 4, 0, 255, 0, 255);

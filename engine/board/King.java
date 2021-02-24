@@ -18,12 +18,10 @@ public class King extends Piece {
     // MOVING
 
     public void move(int nx, int ny) throws AbleToMoveException {
-        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
-
         if (Math.abs(nx - boardx) == 2) {
             int rx = nx > boardx ? 7 : 0;
             Piece r = board.getPiece(rx, boardy);
-            board.getPiece(rx, boardy).boardx = nx > boardx ? 5 : 3;
+            board.changePosition(board.getPiece(rx, boardy), nx > boardx ? 5 : 3, boardy);
             board.addUndoMove(new Move(Tools.Instruction.move, r, new int[] {rx, boardy}));
         }
         Piece pieceAtPos = board.getPiece(nx, ny);
@@ -40,8 +38,8 @@ public class King extends Piece {
         if(!didMove)
             board.addUndoMove(new Move(Tools.Instruction.kingUnMoved, this, null));
 
-        this.boardx = nx;
-        this.boardy = ny;
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
+        board.changePosition(this, nx, ny);
         didMove = true;
     }
 

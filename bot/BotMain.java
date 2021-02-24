@@ -16,8 +16,8 @@ public class BotMain {
     public final BoardClient board;
     public Tools.Side botSide;
 
-    public final static int layers = 20;
-    public final static int movesPerLayer = 10;
+    public final static int layers = 5;
+    public final static int movesPerLayer = 5;
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 15;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
@@ -57,6 +57,7 @@ public class BotMain {
      * @return the highest rated move from the board
      */
     private int[][] getMove() throws InterruptedException, TimeoutException {
+        // moves[i] = {start position, end position, {rating for botSide after the move}}
         int[][][] moves = board.board.getMoves(botSide);
         for(int i = 0; i < moves.length; ++i){
             moves[i] = new int[][]{moves[i][0], moves[i][1], new int[]{Evaluator.getRating(moves[i], board.board, botSide)}};
@@ -65,14 +66,19 @@ public class BotMain {
 
         int evals = Math.min(toRuns.length, moves.length);
         ExecutorService executor = Executors.newFixedThreadPool(evals);
-        for (int i = 0; i < evals; ++i) {
+        for (int i = 0; i < evals && i < moves.length; ++i) {
             Board copy = board.board.copy();
             copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
             copy.nextMove();
 
             toRuns[i] = new Evaluator(layers - 1, Tools.opposite(botSide), movesPerLayer, copy);
             this.moves[i] = moves[i];
-            executor.execute(toRuns[i]);
+            // In general, we'll use multithreading, but in the debug console, we can turn this off and analyze slowly
+            boolean toDebug = false;
+            if(toDebug)
+                toRuns[i].run();
+            else
+                executor.execute(toRuns[i]);
         }
 
         executor.shutdown();

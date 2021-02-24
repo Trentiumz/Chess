@@ -74,7 +74,6 @@ class Evaluator implements Runnable {
         board.doMove(board.getPiece(move[0][0], move[0][1]), move[1]);
         int fr = board.rating();
         board.nextMove();
-        lastM = board.undoMoves.peekLast();
         board.undoLatest(currentSide);
         return fr;
     }
