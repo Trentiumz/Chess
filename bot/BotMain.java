@@ -16,8 +16,8 @@ public class BotMain {
     public final BoardClient board;
     public Tools.Side botSide;
 
-    public final static int layers = 4;
-    public final static int movesPerLayer = 7;
+    public final static int layers = 20;
+    public final static int movesPerLayer = 10;
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 15;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
@@ -69,13 +69,10 @@ public class BotMain {
             Board copy = board.board.copy();
             copy.doMove(copy.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
             copy.nextMove();
-            if(copy.enPassant != null && copy.currentMove == copy.enPassant.side)
-                copy.enPassant = null;
 
             toRuns[i] = new Evaluator(layers - 1, Tools.opposite(botSide), movesPerLayer, copy);
             this.moves[i] = moves[i];
-            toRuns[i].run();
-            // executor.execute(toRuns[i]);
+            executor.execute(toRuns[i]);
         }
 
         executor.shutdown();

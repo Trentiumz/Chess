@@ -37,19 +37,17 @@ public abstract class Piece implements Copyable {
      */
     protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
-        ArrayList<Move> toAdd = new ArrayList<>();
-        toAdd.add(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
+        board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
         if (pieceAtPos != null)
             if (pieceAtPos.side == this.side)
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side... ");
             else{
                 if(pieceAtPos == board.enPassant)
-                    toAdd.add(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
+                    board.addUndoMove(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
                 board.removePiece(pieceAtPos);
-                toAdd.add(new Move(Tools.Instruction.add, pieceAtPos, null));
+                board.addUndoMove(new Move(Tools.Instruction.add, pieceAtPos, null));
             }
 
-        board.addUndo(toAdd);
         this.boardx = nx;
         this.boardy = ny;
     }
@@ -77,11 +75,11 @@ public abstract class Piece implements Copyable {
         HashSet<Integer> toreturn = this.possibleMoves();
         ArrayList<Integer> toremove = new ArrayList<>();
         for (Integer number : toreturn) {
-            Board pseudoBoard = board.copy();
-            Piece self = pseudoBoard.getPiece(boardx, boardy);
-            self.move(Tools.getX(number), Tools.getY(number));
-            if (pseudoBoard.inCheck(side))
+            board.doMove(this, new int[]{Tools.getX(number), Tools.getY(number)});
+            board.nextMove();
+            if (board.inCheck(side))
                 toremove.add(number);
+            board.undoLatest(side);
         }
         toreturn.removeAll(toremove);
         return toreturn;
