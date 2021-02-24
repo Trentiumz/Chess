@@ -9,16 +9,21 @@ import org.jetbrains.annotations.NotNull;
 public class Board implements Copyable {
 
     public final Collection<Piece> pieces;
+    // This one is temporary for when we're just trying to simulate the moves,
+    public Collection<Piece> piecesCopy;
+
     King whiteKing;
     King blackKing;
+    // the current side which is moving; the opposite of the last side that moved
     public Tools.Side currentMove;
 
     public Pawn atEnd;
     public Pawn enPassant;
 
+    // The current move number
     int moveNum = 0;
 
-    // THIS IS THE STACK FOR UNDOING
+    // This is the stack for undoing
     /**
      * {command}
      * if there's a piece, then we have {command, piece}
@@ -132,7 +137,28 @@ public class Board implements Copyable {
 
     public void nextMove() {
         currentMove = opposite();
+        piecesCopy = new ArrayList<>(pieces);
         ++moveNum;
+    }
+
+    public void initialize(){
+        for (Tools.Side side : new Tools.Side[]{Tools.Side.Black, Tools.Side.White}) {
+            int pawnLayer = side == Tools.Side.Black ? 1 : 6;
+            int backLayer = side == Tools.Side.Black ? 0 : 7;
+            for (int i = 0; i < 8; ++i)
+                addPiece(new Pawn(i, pawnLayer, side, this));
+            addPiece(new Rook(0, backLayer, side, this));
+            addPiece(new Rook(7, backLayer, side, this));
+            addPiece(new Knight(1, backLayer, side, this));
+            addPiece(new Knight(6, backLayer, side, this));
+            addPiece(new Bishop(2, backLayer, side, this));
+            addPiece(new Bishop(5, backLayer, side, this));
+            addPiece(new Queen(3, backLayer, side, this));
+        }
+        this.piecesCopy = new ArrayList<>(this.pieces);
+        addKing(Tools.Side.White, new King(4, 7, Tools.Side.White, this));
+        addKing(Tools.Side.Black, new King(4, 0, Tools.Side.Black, this));
+        currentMove = Tools.Side.White;
     }
 
 
@@ -156,12 +182,12 @@ public class Board implements Copyable {
             case White -> Tools.Result.WhiteWon;
             case Black -> Tools.Result.BlackWon;
         }) {
-            return 900;
+            return 9000;
         } else if (getBoardResult() == Tools.Result.Draw)
             return 0;
         else if (getBoardResult() != null)
             // Here, if it isn't a draw, and he didn't win, and there was a result, then the other side won
-            return -900;
+            return -9000;
         return rating;
     }
 
@@ -177,7 +203,7 @@ public class Board implements Copyable {
      */
     public int[][][] getMoves(Tools.Side side) {
         ArrayList<int[][]> possibleMoves = new ArrayList<>();
-        for (Piece p : pieces) {
+        for (Piece p : piecesCopy) {
             if (p.side == side) {
                 for (Integer finalCoord : p.canMove()) {
                     int x = Tools.getX(finalCoord);
@@ -280,7 +306,7 @@ public class Board implements Copyable {
     public Tools.Result getBoardResult() {
         // If the other side doesn't have any moves
         boolean otherSideHasMoves = false;
-        for (Piece piece : this.pieces)
+        for (Piece piece : this.piecesCopy)
             if (piece.side == this.currentMove && piece.canMove().size() > 0) {
                 otherSideHasMoves = true;
                 break;
@@ -289,15 +315,11 @@ public class Board implements Copyable {
             // Then we see if the king is in check
             King otherKing = this.getKing(this.currentMove);
             for (Piece piece : this.pieces)
-                if (piece.side == this.opposite() && piece.canMove().contains(Tools.toNum(otherKing.boardx, otherKing.boardy)))
+                if (piece.side == this.opposite() && piece.possibleMoves().contains(Tools.toNum(otherKing.boardx, otherKing.boardy)))
                     return this.currentMove == Tools.Side.Black ? Tools.Result.WhiteWon : Tools.Result.BlackWon;
             return Tools.Result.Draw;
         }
         return null;
-    }
-
-    public void addUndo(ArrayList<Move> move) {
-        undoMoves.add(move);
     }
 
     public void addUndoMove(Move toAdd) {
@@ -305,7 +327,4 @@ public class Board implements Copyable {
         this.undoMoves.peekLast().add(toAdd);
     }
 
-    public int getUndoQueueSize() {
-        return this.undoMoves.size();
-    }
 }

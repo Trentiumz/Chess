@@ -16,7 +16,7 @@ public class BotMain {
     public final BoardClient board;
     public Tools.Side botSide;
 
-    public final static int layers = 4;
+    public final static int layers = 20;
     public final static int movesPerLayer = 10;
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 15;

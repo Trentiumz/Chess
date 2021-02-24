@@ -20,22 +20,7 @@ public class BoardClient {
      */
     public BoardClient() {
         board = new Board();
-        for (Tools.Side side : new Tools.Side[]{Tools.Side.Black, Tools.Side.White}) {
-            int pawnLayer = side == Tools.Side.Black ? 1 : 6;
-            int backLayer = side == Tools.Side.Black ? 0 : 7;
-            for (int i = 0; i < 8; ++i)
-                board.addPiece(new Pawn(i, pawnLayer, side, board));
-            board.addPiece(new Rook(0, backLayer, side, board));
-            board.addPiece(new Rook(7, backLayer, side, board));
-            board.addPiece(new Knight(1, backLayer, side, board));
-            board.addPiece(new Knight(6, backLayer, side, board));
-            board.addPiece(new Bishop(2, backLayer, side, board));
-            board.addPiece(new Bishop(5, backLayer, side, board));
-            board.addPiece(new Queen(3, backLayer, side, board));
-        }
-        board.addKing(Tools.Side.White, new King(4, 7, Tools.Side.White, board));
-        board.addKing(Tools.Side.Black, new King(4, 0, Tools.Side.Black, board));
-        board.currentMove = Tools.Side.White;
+        board.initialize();
 
         mainState = new MainState();
         promotionState = new PromotionState();
