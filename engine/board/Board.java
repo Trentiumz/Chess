@@ -189,14 +189,15 @@ public class Board implements Copyable {
                 else
                     rating -= getPiece(x, y).rating();
             }
-        if (getBoardResult() == switch (currentSide) {
+        Tools.Result result = getBoardResult();
+        if (result == switch (currentSide) {
             case White -> Tools.Result.WhiteWon;
             case Black -> Tools.Result.BlackWon;
         }) {
             return 9000;
-        } else if (getBoardResult() == Tools.Result.Draw)
+        } else if (result == Tools.Result.Draw)
             return 0;
-        else if (getBoardResult() != null)
+        else if (result != null)
             // Here, if it isn't a draw, and he didn't win, and there was a result, then the other side won
             return -9000;
         return rating;
@@ -214,20 +215,21 @@ public class Board implements Copyable {
      */
     public int[][][] getMoves(Tools.Side side) {
         ArrayList<int[][]> possibleMoves = new ArrayList<>();
-        Arrays.stream(piecePositions).forEach(column -> Arrays.stream(column).forEach(p -> {
-           if(p != null && p.side == side){
-               for (Integer finalCoord : p.canMove()) {
-                   int x = Tools.getX(finalCoord);
-                   int y = Tools.getY(finalCoord);
-                   if (p instanceof Pawn && (y == 0 || y == 7))
-                       // p is a pawn, and it's gonna reach the end; so we gotta promote it
-                       for (int i = 0; i < 4; ++i)
-                           possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y, i}});
-                   else
-                       possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y}});
-               }
-           }
-        }));
+        for(Piece[] column : piecePositions)
+            for(Piece p : column){
+                if(p != null && p.side == side){
+                    for (Integer finalCoord : p.canMove()) {
+                        int x = Tools.getX(finalCoord);
+                        int y = Tools.getY(finalCoord);
+                        if (p instanceof Pawn && (y == 0 || y == 7))
+                            // p is a pawn, and it's gonna reach the end; so we gotta promote it
+                            for (int i = 0; i < 4; ++i)
+                                possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y, i}});
+                        else
+                            possibleMoves.add(new int[][]{{p.boardx, p.boardy}, {x, y}});
+                    }
+                }
+            }
         int[][][] toreturn = new int[possibleMoves.size()][2][];
         for (int i = 0; i < possibleMoves.size(); ++i)
             toreturn[i] = possibleMoves.get(i);
@@ -260,6 +262,7 @@ public class Board implements Copyable {
     }
 
     public boolean otherSideCanGet(Tools.Side side, int x, int y) {
+        // TODO basically this method runs tens to hundreds of times more than the other
         for(Piece[] column : piecePositions)
             for(Piece piece : column){
                 if(piece == null) continue;
@@ -327,20 +330,20 @@ public class Board implements Copyable {
     public Tools.Result getBoardResult() {
         // If the other side doesn't have any moves
         boolean otherSideHasMoves = false;
+        outer:
         for(Piece[] column : piecePositions)
             for(Piece piece : column) {
                 if (piece == null) continue;
                 if (piece.side == this.currentMove && piece.canMove().size() > 0) {
                     otherSideHasMoves = true;
-                    break;
+                    break outer;
                 }
             }
         if (!otherSideHasMoves) {
             // Then we see if the king is in check
-            King otherKing = this.getKing(this.currentMove);
             for(Piece[] column : piecePositions)
                 for(Piece piece : column) {
-                    if (piece != null && piece.side == this.opposite() && piece.possibleMoves().contains(Tools.toNum(otherKing.boardx, otherKing.boardy)))
+                    if (piece != null && piece.side == this.opposite() && inCheck(currentMove))
                         return this.currentMove == Tools.Side.Black ? Tools.Result.WhiteWon : Tools.Result.BlackWon;
                 }
             return Tools.Result.Draw;

@@ -17,7 +17,7 @@ public class BotMain {
     public Tools.Side botSide;
 
     public final static int layers = 5;
-    public final static int movesPerLayer = 5;
+    public final static int movesPerLayer = 8;
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 15;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
@@ -57,6 +57,7 @@ public class BotMain {
      * @return the highest rated move from the board
      */
     private int[][] getMove() throws InterruptedException, TimeoutException {
+        long start = System.currentTimeMillis();
         // moves[i] = {start position, end position, {rating for botSide after the move}}
         int[][][] moves = board.board.getMoves(botSide);
         for(int i = 0; i < moves.length; ++i){
@@ -95,6 +96,7 @@ public class BotMain {
                 bestMove = this.moves[i];
             }
         }
+        System.out.println(System.currentTimeMillis() - start);
         return bestMove;
     }
 }
