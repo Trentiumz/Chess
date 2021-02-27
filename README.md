@@ -49,4 +49,7 @@ Inside the botAssist/positionRatings folder, you'll see various files that just 
 will help the bot make decisions based not solely on piece value, but also on how valuable they are in a specific position. 
 
 # Current Progress
-Using a bit of java profiling, I realized, after a few bug fixes, that we spend a lot of time trying to see if a move creates a check. Therefore, we'll be reducing the number of times we check whether or not a move results in an invalid check.    
+Using a bit of java profiling, I realized, after a few bug fixes, that we spend a lot of time trying to see if a move creates a check. Therefore, we'll be reducing the number of times we check whether or not a move results in an invalid check.
+
+# Nameu
+I shall call my ai-kun mL<sup>3</sup>
