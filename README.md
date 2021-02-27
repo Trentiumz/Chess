@@ -52,4 +52,4 @@ will help the bot make decisions based not solely on piece value, but also on ho
 Using a bit of java profiling, I realized, after a few bug fixes, that we spend a lot of time trying to see if a move creates a check. Therefore, we'll be reducing the number of times we check whether or not a move results in an invalid check.
 
 # Nameu
-I shall call my ai-kun mL<sup>3</sup>
+I shall call my ai mL<sup>3</sup>
