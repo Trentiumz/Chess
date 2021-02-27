@@ -371,15 +371,4 @@ public class Board implements Copyable {
         this.undoMoves.get(undoMoves.size() - 1).add(toAdd);
     }
 
-    /**
-     * A debugging render, just to simplify seeing what the ai is thinking on the screen
-     */
-    public void render(){
-        for(Piece[] column : piecePositions)
-            for(Piece piece : column) {
-                if (piece == null) continue;
-                piece.render();
-            }
-    }
-
 }

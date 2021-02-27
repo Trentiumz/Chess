@@ -49,4 +49,4 @@ Inside the botAssist/positionRatings folder, you'll see various files that just 
 will help the bot make decisions based not solely on piece value, but also on how valuable they are in a specific position. 
 
 # Current Progress
-Using a bit of java profiling, I was able to find that the main problem lied in the fact that we're recalculating possible moves each time we check for a check and each time we want the possible moves, I'm trying to find a way to recalculate possible moves in O(1) times, so that's what's happening right now. I also changed the pieces array to a grid, which vastly improves the speed of getting a specific piece. I've created a second branch for tackling these problems found in my JFR recordings.  
+Using a bit of java profiling, I realized, after a few bug fixes, that we spend a lot of time trying to see if a move creates a check. Therefore, we'll be reducing the number of times we check whether or not a move results in an invalid check.    
