@@ -13,4 +13,13 @@ public class Move {
         this.coords = coords;
     }
 
+    public boolean isEqual(Move other){
+        boolean toreturn = instruction == other.instruction && piece == other.piece && coords.length == other.coords.length;
+        if(!toreturn)
+            return false;
+        for(int i = 0; i < coords.length; ++i)
+            toreturn = toreturn && coords[i] == other.coords[i];
+        return toreturn;
+    }
+
 }

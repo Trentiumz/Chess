@@ -31,7 +31,7 @@ public class SoundPlayer {
      */
     public static void play(Music toPlay){
         currentlyPlaying = toPlay;
-        currentlyPlaying.play(true);
+        // currentlyPlaying.play(true);
     }
 
     /**

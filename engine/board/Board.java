@@ -28,14 +28,14 @@ public class Board implements Copyable {
      * These are all numbers corresponding to the enums of Tools.Instruction & Tools.Piece
      * The moves are also in chronological order; we undo by doing the last instruction first
      */
-    public final Deque<ArrayList<Move>> undoMoves;
+    public final ArrayList<ArrayList<Move>> undoMoves;
 
     // This is for debugging
     public static int time = 0;
 
 
     public Board() {
-        undoMoves = new ArrayDeque<>() {{
+        undoMoves = new ArrayList<>() {{
             add(new ArrayList<>());
         }};
     }
@@ -53,8 +53,8 @@ public class Board implements Copyable {
     public void movePiece(@NotNull Piece piece, int nx, int ny) {
         undoMoves.add(new ArrayList<>());
         if (this.enPassant != null && this.enPassant.side == currentMove) {
-            assert undoMoves.peekLast() != null;
-            undoMoves.peekLast().add(new Move(Tools.Instruction.setEnPassant, enPassant, null));
+            assert undoMoves.get(undoMoves.size() - 1) != null;
+            undoMoves.get(undoMoves.size() - 1).add(new Move(Tools.Instruction.setEnPassant, enPassant, null));
             enPassant = null;
         }
         piece.move(nx, ny);
@@ -74,7 +74,6 @@ public class Board implements Copyable {
             atEnd.promote(Tools.promotionOrder[instruction[2]]);
     }
 
-
     // BOARD EDITTING
 
     public void pawnEnPassant(Pawn pawn) {
@@ -83,8 +82,8 @@ public class Board implements Copyable {
 
     public Piece promote(Tools.Piece piece) {
         Piece toreturn = atEnd.promote(piece);
-        this.addPiece(toreturn);
         removePiece(atEnd);
+        this.addPiece(toreturn);
         atEnd = null;
         return toreturn;
     }
@@ -129,7 +128,7 @@ public class Board implements Copyable {
     public void undoLatest(Tools.Side side) throws InvalidSideException {
         if (currentMove == side)
             throw new InvalidSideException("The one who called to undo is currently supposed to move " + side + " " + currentMove);
-        ArrayList<Move> last = undoMoves.removeLast();
+        ArrayList<Move> last = undoMoves.remove(undoMoves.size() - 1);
         for (int i = last.size() - 1; i >= 0; --i) {
             Move m = last.get(i);
             switch (m.instruction) {
@@ -351,12 +350,25 @@ public class Board implements Copyable {
                 }
             return Tools.Result.Draw;
         }
+        if(undoMoves.size() >= 6){
+            // If all of the last 6 moves were just all only moving pieces
+            if(undoMoves.get(undoMoves.size() - 1).size() == 1 && undoMoves.get(undoMoves.size() - 1).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 2).size() == 1 && undoMoves.get(undoMoves.size() - 2).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 3).size() == 1 && undoMoves.get(undoMoves.size() - 3).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 4).size() == 1 && undoMoves.get(undoMoves.size() - 4).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 5).size() == 1 && undoMoves.get(undoMoves.size() - 5).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 6).size() == 1 && undoMoves.get(undoMoves.size() - 6).get(0).instruction == Tools.Instruction.move){
+                if(undoMoves.get(undoMoves.size() - 1).get(0).isEqual(undoMoves.get(undoMoves.size() - 5).get(0)) &&
+                    undoMoves.get(undoMoves.size() - 2).get(0).isEqual(undoMoves.get(undoMoves.size() - 6).get(0)))
+                    return Tools.Result.Draw;
+            }
+        }
         return null;
     }
 
     public void addUndoMove(Move toAdd) {
-        assert this.undoMoves.peekLast() != null;
-        this.undoMoves.peekLast().add(toAdd);
+        assert this.undoMoves.get(undoMoves.size() - 1) != null;
+        this.undoMoves.get(undoMoves.size() - 1).add(toAdd);
     }
 
     /**
