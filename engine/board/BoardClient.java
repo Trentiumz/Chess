@@ -79,6 +79,7 @@ public class BoardClient {
                         nextMove();
                     if (board.atEnd != null) {
                         currentState = promotionState;
+                        return null;
                     }
                 }
             } else {

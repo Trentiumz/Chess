@@ -8,6 +8,7 @@ import engine.board.Pawn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 class Evaluator implements Runnable {
 
@@ -26,13 +27,17 @@ class Evaluator implements Runnable {
     }
 
     public void run() {
-        result = ratingBounds(layers, currentSide, board);
+        result = ratingBounds(layers, currentSide, board, new AtomicBoolean(true));
     }
 
-    private int ratingBounds(int layers, Tools.Side currentSide, Board board) {
+    private int ratingBounds(int layers, Tools.Side currentSide, Board board, AtomicBoolean hasMove) {
         if (layers <= 0)
             return board.rating();
         int[][][] moves = board.getMoves(currentSide);
+        if(moves.length == 0){
+            hasMove.set(false);
+            return board.rating(currentSide);
+        }
         Pawn p = board.enPassant;
         for(int i = 0; i < moves.length; ++i){
             moves[i] = new int[][]{moves[i][0], moves[i][1], new int[]{getRating(moves[i], board, currentSide)}};
@@ -52,7 +57,10 @@ class Evaluator implements Runnable {
             board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
             board.nextMove();
             // The highest rating that the other player can get, then the negative, is the worst possible rating for this
-            int worstCase = -ratingBounds(layers - 1, Tools.opposite(currentSide), board);
+            AtomicBoolean moveCanContinue = new AtomicBoolean(true);
+            int worstCase = -ratingBounds(layers - 1, Tools.opposite(currentSide), board, moveCanContinue);
+            if(!moveCanContinue.get())
+                worstCase = moves[i][2][0];
             board.undoLatest(currentSide);
             highestForcedRating = Math.max(worstCase, highestForcedRating);
         }
@@ -64,16 +72,21 @@ class Evaluator implements Runnable {
         return result;
     }
 
-    // DEBUGGING
-    static ArrayList<Move> lastM;
-
+    /**
+     * Get the rating of the board after making a move
+     * @param move The move that currentSide will do
+     * @param board the board to do the move on
+     * @param currentSide the current side that is doing the move
+     * @return the rating of currentSide after currentSide does the move
+     */
     public static int getRating(int[][] move, Board board, Tools.Side currentSide){
         if(!board.canDoMove(board.getPiece(move[0][0], move[0][1]), move[1])){
             System.out.println("oop board failed move");
         }
+        // Do the move
         board.doMove(board.getPiece(move[0][0], move[0][1]), move[1]);
-        int fr = board.rating();
         board.nextMove();
+        int fr = board.rating(currentSide);
         board.undoLatest(currentSide);
         return fr;
     }
