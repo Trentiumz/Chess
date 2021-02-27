@@ -57,6 +57,7 @@ public class BotMain {
      * @return the highest rated move from the board
      */
     private int[][] getMove() throws InterruptedException, TimeoutException {
+        Board.time = 0;
         long start = System.currentTimeMillis();
         // moves[i] = {start position, end position, {rating for botSide after the move}}
         int[][][] moves = board.board.getMoves(botSide);
@@ -97,6 +98,7 @@ public class BotMain {
             }
         }
         System.out.println(System.currentTimeMillis() - start);
+        System.out.println(Board.time);
         return bestMove;
     }
 }

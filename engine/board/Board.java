@@ -30,6 +30,9 @@ public class Board implements Copyable {
      */
     public final Deque<ArrayList<Move>> undoMoves;
 
+    // This is for debugging
+    public static int time = 0;
+
 
     public Board() {
         undoMoves = new ArrayDeque<>() {{
