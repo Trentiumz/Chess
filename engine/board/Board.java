@@ -113,13 +113,13 @@ public class Board implements Copyable {
         piece.setPosition(nx, ny);
     }
 
-    public void addKing(Tools.Side side, King king) {
-        setKing(side, king);
+    public void addKing(King king) {
+        setKing(king);
         this.addPiece(king);
     }
 
-    public void setKing(Tools.Side side, King king) {
-        switch (side) {
+    public void setKing(King king) {
+        switch (king.side) {
             case White -> this.whiteKing = king;
             case Black -> this.blackKing = king;
         }
@@ -166,8 +166,8 @@ public class Board implements Copyable {
             addPiece(new Bishop(5, backLayer, side, this));
             addPiece(new Queen(3, backLayer, side, this));
         }
-        addKing(Tools.Side.White, new King(4, 7, Tools.Side.White, this));
-        addKing(Tools.Side.Black, new King(4, 0, Tools.Side.Black, this));
+        addKing(new King(4, 7, Tools.Side.White, this));
+        addKing(new King(4, 0, Tools.Side.Black, this));
         currentMove = Tools.Side.White;
     }
 
@@ -248,13 +248,6 @@ public class Board implements Copyable {
         return false;
     }
 
-    public King getKing(Tools.Side side) {
-        return switch (side) {
-            case White -> this.whiteKing;
-            case Black -> this.blackKing;
-        };
-    }
-
     public boolean inCheck(Tools.Side side) {
         King piece = switch (side) {
             case White -> whiteKing;
@@ -285,8 +278,8 @@ public class Board implements Copyable {
                 if (p != whiteKing && p != blackKing && p != atEnd && p != enPassant)
                     toreturn.addPiece(p.copy());
             }
-        toreturn.addKing(Tools.Side.White, whiteKing.copy());
-        toreturn.addKing(Tools.Side.Black, blackKing.copy());
+        toreturn.addKing(whiteKing.copy());
+        toreturn.addKing(blackKing.copy());
         toreturn.currentMove = currentMove;
         if (atEnd != null) {
             toreturn.atEnd = atEnd.copy();
@@ -357,8 +350,19 @@ public class Board implements Copyable {
                 undoMoves.get(undoMoves.size() - 3).size() == 1 && undoMoves.get(undoMoves.size() - 3).get(0).instruction == Tools.Instruction.move &&
                 undoMoves.get(undoMoves.size() - 4).size() == 1 && undoMoves.get(undoMoves.size() - 4).get(0).instruction == Tools.Instruction.move &&
                 undoMoves.get(undoMoves.size() - 5).size() == 1 && undoMoves.get(undoMoves.size() - 5).get(0).instruction == Tools.Instruction.move &&
-                undoMoves.get(undoMoves.size() - 6).size() == 1 && undoMoves.get(undoMoves.size() - 6).get(0).instruction == Tools.Instruction.move){
+                undoMoves.get(undoMoves.size() - 6).size() == 1 && undoMoves.get(undoMoves.size() - 6).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 1).get(0).piece == undoMoves.get(undoMoves.size() - 3).get(0).piece &&
+                undoMoves.get(undoMoves.size() - 1).get(0).piece == undoMoves.get(undoMoves.size() - 5).get(0).piece &&
+                undoMoves.get(undoMoves.size() - 2).get(0).piece == undoMoves.get(undoMoves.size() - 4).get(0).piece &&
+                undoMoves.get(undoMoves.size() - 2).get(0).piece == undoMoves.get(undoMoves.size() - 6).get(0).piece){
+                // 3 past moves are moving the same piece, now we must check that:
+                // the last move goes to the same place as the last last last move
+                // the last last move goes to the current position as the current piece
                 if(undoMoves.get(undoMoves.size() - 1).get(0).isEqual(undoMoves.get(undoMoves.size() - 5).get(0)) &&
+                    undoMoves.get(undoMoves.size() - 3).get(0).coords[0] == undoMoves.get(undoMoves.size() - 3).get(0).piece.boardx &&
+                    undoMoves.get(undoMoves.size() - 3).get(0).coords[1] == undoMoves.get(undoMoves.size() - 3).get(0).piece.boardy &&
+                    undoMoves.get(undoMoves.size() - 4).get(0).coords[0] == undoMoves.get(undoMoves.size() - 4).get(0).piece.boardx &&
+                    undoMoves.get(undoMoves.size() - 4).get(0).coords[1] == undoMoves.get(undoMoves.size() - 4).get(0).piece.boardy &&
                     undoMoves.get(undoMoves.size() - 2).get(0).isEqual(undoMoves.get(undoMoves.size() - 6).get(0)))
                     return Tools.Result.Draw;
             }
