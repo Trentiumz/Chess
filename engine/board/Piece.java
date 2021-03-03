@@ -80,11 +80,11 @@ public abstract class Piece implements Copyable {
         HashSet<Integer> toreturn = this.possibleMoves();
         ArrayList<Integer> toremove = new ArrayList<>();
         for (Integer number : toreturn) {
-            board.doMove(this, new int[]{Tools.getX(number), Tools.getY(number)});
-            board.nextMove();
-            if (board.inCheck(side))
-                toremove.add(number);
-            board.undoLatest(side);
+            for(Piece checking : board.checking)
+                if(!checking.doesBlock(Tools.getX(number), Tools.getY(number))) {
+                    toremove.add(number);
+                    break;
+                }
         }
         toreturn.removeAll(toremove);
         return toreturn;

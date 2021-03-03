@@ -158,6 +158,7 @@ public class Board implements Copyable {
                 case resetAtEnd -> atEnd = null;
                 case setEnPassant -> enPassant = (Pawn) m.piece;
                 case setAtEnd -> atEnd = (Pawn) m.piece;
+                case setChecking -> checking = m.checking;
             }
         }
         currentMove = opposite();
@@ -167,6 +168,7 @@ public class Board implements Copyable {
     public void nextMove() {
         currentMove = opposite();
         ++moveNum;
+        undoMoves.get(undoMoves.size() - 1).add(new Move(Tools.Instruction.setChecking, checking));
         checking = piecesChecking(currentMove);
     }
 

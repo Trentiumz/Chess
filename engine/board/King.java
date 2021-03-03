@@ -48,6 +48,20 @@ public class King extends Piece {
         didMove = true;
     }
 
+    @Override
+    public HashSet<Integer> canMove() {
+        HashSet<Integer> toreturn = this.possibleMoves();
+        ArrayList<Integer> toremove = new ArrayList<>();
+        for (Integer number : toreturn) {
+            for(Piece checking : board.checking)
+                if(checking.capturableSpaces().contains(number)){
+                    toremove.add(number);
+                    break;
+                }
+        }
+        toreturn.removeAll(toremove);
+        return toreturn;
+    }
 
     // GETTING POSSIBLE MOVES
 

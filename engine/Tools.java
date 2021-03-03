@@ -36,7 +36,7 @@ public class Tools {
 
     // Commands for undoing
     public enum Instruction{
-        move, add, remove, kingUnMoved, rookUnMoved, resetEnPassant, resetAtEnd, setEnPassant, setAtEnd
+        move, add, remove, kingUnMoved, rookUnMoved, resetEnPassant, resetAtEnd, setEnPassant, setAtEnd, setChecking
     }
 
 

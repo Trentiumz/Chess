@@ -16,27 +16,6 @@ public class Pawn extends Piece {
     // MOVING
 
     @Override
-    public HashSet<Integer> canMove() {
-        HashSet<Integer> toreturn = this.possibleMoves();
-        ArrayList<Integer> toremove = new ArrayList<>();
-        for (Integer number : toreturn) {
-            int[] arguments;
-            if (Tools.getY(number) == 0 || Tools.getY(number) == 7)
-                // this 0 is really just a pseudo-thing, since we just want to see if we can go there
-                arguments = new int[]{Tools.getX(number), Tools.getY(number), 0};
-            else
-                arguments = new int[]{Tools.getX(number), Tools.getY(number)};
-            board.doMove(this, arguments);
-            board.nextMove();
-            if (board.inCheck(side))
-                toremove.add(number);
-            board.undoLatest(side);
-        }
-        toreturn.removeAll(toremove);
-        return toreturn;
-    }
-
-    @Override
     protected void move(int nx, int ny) throws AbleToMoveException {
         Piece pieceAtPos = board.getPiece(nx, ny);
         if (pieceAtPos != null){
