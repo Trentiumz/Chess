@@ -13,6 +13,12 @@ public abstract class Piece implements Copyable {
     public final Tools.Side side;
     Board board;
 
+    /**
+     * This is a memoization for the capturable spaces
+     */
+    public HashSet<Integer> capturableSpaces;
+    protected int moveNumForSpaces = Integer.MIN_VALUE;
+
     public Piece(int x, int y, Tools.Side side, Board board) {
         this.boardx = x;
         this.boardy = y;
@@ -108,6 +114,17 @@ public abstract class Piece implements Copyable {
     public abstract Piece copy();
 
     public abstract float rating();
+
+    /**
+     * Returns whether or not a piece at (x,y) will stop this piece from checking the opposing king
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @return whether or not a piece at (x,y) will stop this piece from checking the opposing king
+     * @implNote This method will assume that this piece is actually already checking the king and it gives a quick way
+     * of finding if moving to said position will stop this piece from getting to the king
+     * @implNote If x=boardx & y=boardy, then this piece assumes that the other piece will "eat" this piece
+     */
+    public abstract boolean doesBlock(int x, int y);
 
     // RENDERING
 

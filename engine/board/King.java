@@ -17,6 +17,11 @@ public class King extends Piece {
 
     // MOVING
 
+    @Override
+    public boolean doesBlock(int x, int y) throws InvalidPieceException{
+        throw new InvalidPieceException("You called a method which assumes that this king at (" + boardx + ", " + boardy + ") is able to check the other king, which is theoretically impossible!");
+    }
+
     public void move(int nx, int ny) throws AbleToMoveException {
         if (Math.abs(nx - boardx) == 2) {
             int rx = nx > boardx ? 7 : 0;
@@ -64,15 +69,17 @@ public class King extends Piece {
 
     @Override
     protected HashSet<Integer> capturableSpaces() {
-        HashSet<Integer> toreturn = new HashSet<>();
-        for (int[] direction : new int[][]{{1, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
-            int cx = boardx + direction[0];
-            int cy = boardy + direction[1];
-            Piece thePiece = board.getPiece(cx, cy);
-            if ((thePiece == null || thePiece.side != this.side) && board.inBounds(cx, cy))
-                toreturn.add(Tools.toNum(cx, cy));
+        if(moveNumForSpaces != board.moveNum){
+            capturableSpaces = new HashSet<>();
+            for (int[] direction : new int[][]{{1, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
+                int cx = boardx + direction[0];
+                int cy = boardy + direction[1];
+                Piece thePiece = board.getPiece(cx, cy);
+                if ((thePiece == null || thePiece.side != this.side) && board.inBounds(cx, cy))
+                    capturableSpaces.add(Tools.toNum(cx, cy));
+            }
         }
-        return toreturn;
+        return capturableSpaces;
     }
 
 

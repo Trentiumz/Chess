@@ -14,6 +14,11 @@ public class Knight extends Piece{
 	// GETTING POSSIBLE MOVES
 
 	@Override
+	public boolean doesBlock(int x, int y) {
+		return x == boardx && y == boardy;
+	}
+
+	@Override
 	protected HashSet<Integer> possibleMoves() {
 		HashSet<Integer> toreturn = new HashSet<>();
 		for(int[] direction : new int[][]{{2, 1}, {2, -1}, {1, 2}, {-1, 2}, {1, -2}, {-1, -2}, {-2, 1}, {-2, -1}}){
@@ -28,7 +33,9 @@ public class Knight extends Piece{
 
 	@Override
 	protected HashSet<Integer> capturableSpaces() {
-		return possibleMoves();
+		if(moveNumForSpaces != board.moveNum)
+			capturableSpaces = possibleMoves();
+		return capturableSpaces;
 	}
 
 

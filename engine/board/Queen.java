@@ -33,8 +33,27 @@ public class Queen extends Piece {
     }
 
     @Override
+    public boolean doesBlock(int x, int y) {
+        if(x == boardx && y == boardy)
+            return true;
+        King otherKing = board.getKing(Tools.opposite(side));
+        // If on the same row/column, see if it's in the same direction & closer
+        if(x == boardx || y == boardy) {
+            if (Integer.signum(otherKing.boardx - boardx) == Integer.signum(x - boardx) && Integer.signum(otherKing.boardy - boardy) == Integer.signum(y - boardy) && Math.abs(y - boardy) < Math.abs(otherKing.boardy - boardy))
+                return true;
+        // If on the same diagonal, see if it's in the same direction & closer
+        }else if(Math.abs(x - boardx) == Math.abs(y - boardy)) {
+            if (Math.signum(otherKing.boardx - boardx) == Math.signum(x - boardx) && Math.signum(otherKing.boardy - boardy) == Math.signum(y - boardy) && Math.abs(x - boardx) < Math.abs(otherKing.boardx - boardx))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
     protected HashSet<Integer> capturableSpaces() {
-        return possibleMoves();
+        if(moveNumForSpaces != board.moveNum)
+            capturableSpaces = possibleMoves();
+        return capturableSpaces;
     }
 
 

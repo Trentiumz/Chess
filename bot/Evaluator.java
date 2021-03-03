@@ -2,10 +2,8 @@ package bot;
 
 import engine.Tools;
 import engine.board.Board;
-import engine.board.Move;
 import engine.board.Pawn;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,7 +49,7 @@ class Evaluator implements Runnable {
         int highestForcedRating = Integer.MIN_VALUE;
 
         for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
-            if(!board.canDoMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
+            if(!board.canMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
                 System.out.println("Copy failed to move");
             }
             board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
@@ -80,7 +78,7 @@ class Evaluator implements Runnable {
      * @return the rating of currentSide after currentSide does the move
      */
     public static int getRating(int[][] move, Board board, Tools.Side currentSide){
-        if(!board.canDoMove(board.getPiece(move[0][0], move[0][1]), move[1])){
+        if(!board.canMove(board.getPiece(move[0][0], move[0][1]), move[1])){
             System.out.println("oop board failed move");
         }
         // Do the move

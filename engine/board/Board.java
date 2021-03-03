@@ -30,6 +30,9 @@ public class Board implements Copyable {
      */
     public final ArrayList<ArrayList<Move>> undoMoves;
 
+    // This is the set for the checks
+    public ArrayList<Piece> checking;
+
     // This is for debugging
     public static int time = 0;
 
@@ -38,6 +41,7 @@ public class Board implements Copyable {
         undoMoves = new ArrayList<>() {{
             add(new ArrayList<>());
         }};
+        checking = new ArrayList<>();
     }
 
 
@@ -60,14 +64,27 @@ public class Board implements Copyable {
         piece.move(nx, ny);
     }
 
+    /**
+     * Returns whether or not this piece can move to nx, ny
+     * @param piece The piece that you are trying to move
+     * @param nx The x coordinate that you want to move the piece to
+     * @param ny The y coordinate that you want to move the piece to
+     * @return Whether or not we are able to move the piece to this coordinate
+     */
     public boolean canMove(Piece piece, int nx, int ny) {
         return piece.canMoveTo(nx, ny);
     }
 
-    public boolean canDoMove(@NotNull Piece piece, int[] instruction) {
+    public boolean canMove(@NotNull Piece piece, int[] instruction) {
         return canMove(piece, instruction[0], instruction[1]);
     }
 
+    /**
+     * Same as movePiece, but for the bot
+     * @param piece The piece to move
+     * @param instruction The instruction that you want to move the piece by: either {final x coord, final y coord}
+     *                    or {final x coord, final y coord, index of the promotion that you wish to do}
+     */
     public void doMove(@NotNull Piece piece, int[] instruction) {
         movePiece(piece, instruction[0], instruction[1]);
         if (piece == atEnd)
@@ -150,6 +167,7 @@ public class Board implements Copyable {
     public void nextMove() {
         currentMove = opposite();
         ++moveNum;
+        checking = piecesChecking(currentMove);
     }
 
     public void initialize() {
@@ -169,6 +187,8 @@ public class Board implements Copyable {
         addKing(new King(4, 7, Tools.Side.White, this));
         addKing(new King(4, 0, Tools.Side.Black, this));
         currentMove = Tools.Side.White;
+
+        checking = piecesChecking(currentMove);
     }
 
 
@@ -257,7 +277,6 @@ public class Board implements Copyable {
     }
 
     public boolean otherSideCanGet(Tools.Side side, int x, int y) {
-        // TODO basically this method runs tens to hundreds of times more than the other
         for(Piece[] column : piecePositions)
             for(Piece piece : column){
                 if(piece == null) continue;
@@ -267,6 +286,23 @@ public class Board implements Copyable {
             }
 
         return false;
+    }
+
+    /**
+     * Gets the pieces that are checking the king
+     * @param side the side of the king who is being checked
+     * @return An Arraylist of the Pieces that are checking [side]
+     */
+    public ArrayList<Piece> piecesChecking(Tools.Side side){
+        ArrayList<Piece> toReturn = new ArrayList<>();
+        for(Piece[] column : piecePositions)
+            for(Piece piece : column){
+                if(piece == null) continue;
+                if (piece.side != side && piece.capturableSpaces().contains(Tools.toNum(getKing(side).boardx, getKing(side).boardy))) {
+                    toReturn.add(piece);
+                }
+            }
+        return toReturn;
     }
 
     public Board copy() {
@@ -335,14 +371,10 @@ public class Board implements Copyable {
                 }
             }
         if (!otherSideHasMoves) {
-            // Then we see if the king is in check
-            for(Piece[] column : piecePositions)
-                for(Piece piece : column) {
-                    if (piece != null && piece.side == this.opposite() && inCheck(currentMove))
-                        return this.currentMove == Tools.Side.Black ? Tools.Result.WhiteWon : Tools.Result.BlackWon;
-                }
-            return Tools.Result.Draw;
+            // See if this king is in check and if it is, then we know it's a win; otherwise, it's a draw
+            return inCheck(currentMove) ? this.currentMove == Tools.Side.Black ? Tools.Result.WhiteWon : Tools.Result.BlackWon : Tools.Result.Draw;
         }
+        // Checking for perpetual draw
         if(undoMoves.size() >= 6){
             // If all of the last 6 moves were just all only moving pieces
             if(undoMoves.get(undoMoves.size() - 1).size() == 1 && undoMoves.get(undoMoves.size() - 1).get(0).instruction == Tools.Instruction.move &&
@@ -373,6 +405,13 @@ public class Board implements Copyable {
     public void addUndoMove(Move toAdd) {
         assert this.undoMoves.get(undoMoves.size() - 1) != null;
         this.undoMoves.get(undoMoves.size() - 1).add(toAdd);
+    }
+
+    public King getKing(Tools.Side side){
+        return switch(side){
+            case White -> whiteKing;
+            case Black -> blackKing;
+        };
     }
 
 }

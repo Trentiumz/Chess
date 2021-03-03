@@ -91,20 +91,22 @@ public class Pawn extends Piece {
 
     @Override
     protected HashSet<Integer> capturableSpaces() {
-        HashSet<Integer> toreturn = new HashSet<>();
-        int move = side == Side.White ? -1 : 1;
+        if(moveNumForSpaces != board.moveNum){
+            capturableSpaces = new HashSet<>();
+            int move = side == Side.White ? -1 : 1;
 
-        Piece piece1 = board.getPiece(boardx + 1, boardy + move);
-        Piece piece2 = board.getPiece(boardx - 1, boardy + move);
-        if (piece1 != null && piece1.side != this.side)
-            toreturn.add(Tools.toNum(boardx + 1, boardy + move));
-        if (piece2 != null && piece2.side != this.side)
-            toreturn.add(Tools.toNum(boardx - 1, boardy + move));
+            Piece piece1 = board.getPiece(boardx + 1, boardy + move);
+            Piece piece2 = board.getPiece(boardx - 1, boardy + move);
+            if (piece1 != null && piece1.side != this.side)
+                capturableSpaces.add(Tools.toNum(boardx + 1, boardy + move));
+            if (piece2 != null && piece2.side != this.side)
+                capturableSpaces.add(Tools.toNum(boardx - 1, boardy + move));
 
-        if (board.enPassant != null && Math.abs(board.enPassant.boardx - this.boardx) == 1 && board.enPassant.boardy == this.boardy)
-            if (board.isEmpty(board.enPassant.boardx, board.enPassant.boardy + move))
-                toreturn.add(Tools.toNum(board.enPassant.boardx, board.enPassant.boardy));
-        return toreturn;
+            if (board.enPassant != null && Math.abs(board.enPassant.boardx - this.boardx) == 1 && board.enPassant.boardy == this.boardy)
+                if (board.isEmpty(board.enPassant.boardx, board.enPassant.boardy + move))
+                    capturableSpaces.add(Tools.toNum(board.enPassant.boardx, board.enPassant.boardy));
+        }
+        return capturableSpaces;
     }
 
     // PIECE SPECIFIC METHODS
@@ -126,6 +128,12 @@ public class Pawn extends Piece {
     }
 
     // PROMOTING
+
+    @Override
+    public boolean doesBlock(int x, int y) {
+        // This pawn can only capture directly to its diagonal, so it's obviously impossible to block this pawn if it's checking the king... you must capture it
+        return x == boardx && y == boardy;
+    }
 
     public Piece promote(Tools.Piece piece) throws InvalidPieceException {
         return switch (piece) {
