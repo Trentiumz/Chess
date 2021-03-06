@@ -66,10 +66,10 @@ public class Rook extends Piece {
         if (x == boardx && y == boardy)
             return true;
         // If the opponent is on the column, is in the same direction as the king from this piece and is closer to this piece
-        else if (x == boardx && Integer.signum(oppositeKing.boardy - boardy) == Integer.signum(y - boardy) && Math.abs(y - boardy) > Math.abs(oppositeKing.boardy - boardy))
+        else if (x == boardx && Integer.signum(oppositeKing.boardy - boardy) == Integer.signum(y - boardy) && Math.abs(y - boardy) < Math.abs(oppositeKing.boardy - boardy))
             return true;
         // If the opponent is on the same row, is in the same direction as the king from this piece and is closer to this piece
-        else if (y == boardy && Integer.signum(oppositeKing.boardx - boardx) == Integer.signum(x - boardx) && Math.abs(x - boardx) > Math.abs(oppositeKing.boardx - boardx))
+        else if (y == boardy && Integer.signum(oppositeKing.boardx - boardx) == Integer.signum(x - boardx) && Math.abs(x - boardx) < Math.abs(oppositeKing.boardx - boardx))
             return true;
         // If none of these are true, then moving to x,y does not block this piece
         else
@@ -100,7 +100,7 @@ public class Rook extends Piece {
 
     @Override
     public float rating() {
-        return 50 + getRating();
+        return (this.side == Tools.Side.White ? 1 : -1) * (50 + getRating());
     }
 
 }

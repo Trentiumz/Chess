@@ -197,38 +197,26 @@ public class Board implements Copyable {
     // INFORMATION METHODS
 
     /**
-     * Returns the "rating" of the board
-     *
-     * @param currentSide the side of the player
-     * @return the "rating" of the board in favor of the player; higher number means the player is doing better
+     * Returns the rating of the board
+     * @return The rating of the board
+     * @implNote The rating is done such that a higher rating means white is winning, while a lower rating means black advantage
      */
-    public int rating(Tools.Side currentSide) {
+    public int rating() {
         int rating = 0;
         for (int x = 0; x < piecePositions.length; ++x)
             for (int y = 0; y < piecePositions[x].length; ++y) {
                 if(getPiece(x, y) == null)
                     continue;
-                if (getPiece(x, y).side == currentSide)
-                    rating += getPiece(x, y).rating();
-                else
-                    rating -= getPiece(x, y).rating();
+                rating += getPiece(x, y).rating();
             }
         Tools.Result result = getBoardResult();
-        if (result == switch (currentSide) {
-            case White -> Tools.Result.WhiteWon;
-            case Black -> Tools.Result.BlackWon;
-        }) {
+        if(result == Tools.Result.WhiteWon)
             return 9000;
-        } else if (result == Tools.Result.Draw)
+        else if (result == Tools.Result.Draw)
             return 0;
-        else if (result != null)
-            // Here, if it isn't a draw, and he didn't win, and there was a result, then the other side won
+        else if (result == Tools.Result.BlackWon)
             return -9000;
         return rating;
-    }
-
-    public int rating() {
-        return rating(currentMove);
     }
 
     /**

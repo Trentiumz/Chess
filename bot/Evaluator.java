@@ -6,7 +6,6 @@ import engine.board.Pawn;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 class Evaluator implements Runnable {
 
@@ -25,17 +24,26 @@ class Evaluator implements Runnable {
     }
 
     public void run() {
-        result = ratingBounds(layers, currentSide, board, new AtomicBoolean(true));
+        result = ratingBounds(layers, board, currentSide);
     }
 
-    private int ratingBounds(int layers, Tools.Side currentSide, Board board, AtomicBoolean hasMove) {
+    /**
+     * Returns the optimal rating using the minimax algorithm
+     * @param layers the "depth" of which to calculate
+     * @param board The board to do the moves on
+     * @param currentSide The current side the method is playing for
+     * @return The optimal rating
+     */
+    private int ratingBounds(int layers, Board board, Tools.Side currentSide) {
+        // If we've reached the target depth or there are no moves left, then we return the current rating
         if (layers <= 0)
             return board.rating();
         int[][][] moves = board.getMoves(currentSide);
         if(moves.length == 0){
-            hasMove.set(false);
-            return board.rating(currentSide);
+            return board.rating();
         }
+
+        // Sort the possible moves from lowest immediate rating to highest immediate rating
         Pawn p = board.enPassant;
         for(int i = 0; i < moves.length; ++i){
             moves[i] = new int[][]{moves[i][0], moves[i][1], new int[]{getRating(moves[i], board, currentSide)}};
@@ -46,24 +54,47 @@ class Evaluator implements Runnable {
         // Comparator: Positive if order is a -> b; negative if order is b -> a
         Arrays.sort(moves, Comparator.comparingInt((int[][] a) -> a[2][0]));
 
-        int highestForcedRating = Integer.MIN_VALUE;
+        int optimalRating;
+        if(currentSide == Tools.Side.White){
+            optimalRating = Integer.MIN_VALUE;
 
-        for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
-            if(!board.canMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
-                System.out.println("Copy failed to move");
+            // Alpha-Beta pruning; we assume both sides will only play the top x moves
+            for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
+                // Mostly for debugging
+                if(!board.canMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
+                    System.out.println("Copy failed to move");
+                }
+
+                // We play the move
+                board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
+                board.nextMove();
+
+                // The optimal rating - the lowest rating the opponent can get
+                int worstCase = ratingBounds(layers - 1, board, Tools.opposite(currentSide));
+
+                // Undo the move, and update the optimal rating
+                board.undoLatest(currentSide);
+                optimalRating = Math.max(worstCase, optimalRating);
             }
-            board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
-            board.nextMove();
-            // The highest rating that the other player can get, then the negative, is the worst possible rating for this
-            AtomicBoolean moveCanContinue = new AtomicBoolean(true);
-            int worstCase = -ratingBounds(layers - 1, Tools.opposite(currentSide), board, moveCanContinue);
-            if(!moveCanContinue.get())
-                worstCase = moves[i][2][0];
-            board.undoLatest(currentSide);
-            highestForcedRating = Math.max(worstCase, highestForcedRating);
+        }else{
+            // Symmetric to the above MAX algorithm
+            optimalRating = Integer.MAX_VALUE;
+
+            for (int i = 0; i < movesPerLayer && i < moves.length; ++i) {
+                if(!board.canMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
+                    System.out.println("Copy failed to move");
+                }
+                board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
+                board.nextMove();
+
+                int worstCase = ratingBounds(layers - 1, board, Tools.opposite(currentSide));
+
+                board.undoLatest(currentSide);
+                optimalRating = Math.min(worstCase, optimalRating);
+            }
         }
 
-        return highestForcedRating;
+        return optimalRating;
     }
 
     public synchronized int getResult() {
@@ -84,7 +115,7 @@ class Evaluator implements Runnable {
         // Do the move
         board.doMove(board.getPiece(move[0][0], move[0][1]), move[1]);
         board.nextMove();
-        int fr = board.rating(currentSide);
+        int fr = board.rating();
         board.undoLatest(currentSide);
         return fr;
     }

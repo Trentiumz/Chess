@@ -103,7 +103,7 @@ public class Pawn extends Piece {
 
     @Override
     public float rating() {
-        return 10 + getRating();
+        return (this.side == Tools.Side.White ? 1 : -1) * (10 + getRating());
     }
 
     // PROMOTING

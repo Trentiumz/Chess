@@ -71,6 +71,6 @@ public class Bishop extends Piece{
 
 	@Override
 	public float rating() {
-		return 30 + getRating();
+		return (this.side == Tools.Side.White ? 1 : -1) * (30 + getRating());
 	}
 }

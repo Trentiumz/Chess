@@ -53,11 +53,12 @@ public class King extends Piece {
         HashSet<Integer> toreturn = this.possibleMoves();
         ArrayList<Integer> toremove = new ArrayList<>();
         for (Integer number : toreturn) {
-            for(Piece checking : board.checking)
-                if(checking.capturableSpaces().contains(number)){
-                    toremove.add(number);
-                    break;
-                }
+            board.doMove(this, new int[]{Tools.getX(number), Tools.getY(number)});
+            board.nextMove();
+            if (board.otherSideCanGet(side, this.boardx, this.boardy)) {
+                toremove.add(number);
+            }
+            board.undoLatest(side);
         }
         toreturn.removeAll(toremove);
         return toreturn;
@@ -113,6 +114,6 @@ public class King extends Piece {
 
     @Override
     public float rating() {
-        return 900 + getRating();
+        return (this.side == Tools.Side.White ? 1 : -1) * (900 + getRating());
     }
 }
