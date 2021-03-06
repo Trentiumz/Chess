@@ -19,7 +19,7 @@ public class BotMain {
     public final static int layers = 5;
     public final static int movesPerLayer = 8;
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
-    public final static int firstMoveCount = 15;
+    public final static int firstMoveCount = 50;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
     public volatile int[][][] moves = new int[firstMoveCount][][];
 
