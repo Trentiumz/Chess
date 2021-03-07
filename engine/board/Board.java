@@ -30,7 +30,7 @@ public class Board implements Copyable {
      */
     public final ArrayList<ArrayList<Move>> undoMoves;
 
-    // This is the set for the checks
+    // This is the set for any pieces that can
     public ArrayList<Piece> checking;
 
     // This is for debugging

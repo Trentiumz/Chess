@@ -140,7 +140,7 @@ public abstract class Piece implements Copyable {
 
     // TOOL METHODS
     protected float getRating(){
-        int layer = side == Tools.Side.Black ? boardy : 7 - boardy;
-        return Tools.getPositionRating(getPiece(), boardx, layer);
+        int layer = side == Tools.Side.Black ? 7 - boardy : boardy;
+        return Tools.getPositionRating(getPiece(), layer, boardx);
     }
 }
