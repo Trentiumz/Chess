@@ -51,6 +51,7 @@ public class MainState implements State{
     @Override
     public void mousePressed(int x, int y) {
         Tools.Result result = board.click(x, y, playerSide);
+//        Tools.Result result = board.click(x, y, board.board.currentMove);
         handleResult(result);
         render();
     }

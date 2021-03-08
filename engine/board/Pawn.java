@@ -12,6 +12,9 @@ public class Pawn extends Piece {
         super(x, y, side, board);
     }
 
+    public Pawn(Pawn other){
+        super(other);
+    }
 
     // MOVING
 
@@ -98,7 +101,12 @@ public class Pawn extends Piece {
 
     @Override
     public Pawn copy() {
-        return new Pawn(boardx, boardy, side, board);
+        return new Pawn(this);
+    }
+
+    @Override
+    public boolean willCheck(Piece toMove, int newX, int newY) {
+        return !(boardx == newX && boardy == newY);
     }
 
     @Override
@@ -106,6 +114,13 @@ public class Pawn extends Piece {
         return (this.side == Tools.Side.White ? 1 : -1) * (10 + getRating());
     }
 
+    @Override
+    public boolean otherKingInRange() {
+        int forwardDirection = this.side == Tools.Side.White ? -1 : 1;
+        King otherKing = board.getKing(Tools.opposite(side));
+        inPath.clear();
+        return otherKing.boardy - boardy == forwardDirection && Math.abs(otherKing.boardx - boardx) == 1;
+    }
     // PROMOTING
 
     @Override

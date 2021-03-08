@@ -31,9 +31,9 @@ public class BoardClient {
     // HANDLING CLICKS
 
     public Tools.Result click(int x, int y, Tools.Side currentSide) {
-        if(board.currentMove == currentSide)
-            return currentState.click(x, y);
-        return null;
+        //if(board.currentMove == currentSide)
+        return currentState.click(x, y);
+        // return null;
     }
 
     public Tools.Result botClick(int[] start, int[] end) {

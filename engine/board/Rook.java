@@ -13,6 +13,11 @@ public class Rook extends Piece {
         super(x, y, side, board);
     }
 
+    public Rook(Rook other){
+        super(other);
+        this.isMoved = other.isMoved;
+    }
+
     // MOVING
 
     @Override
@@ -83,8 +88,37 @@ public class Rook extends Piece {
         return capturableSpaces;
     }
 
+    @Override
+    public boolean willCheck(Piece toMove, int newX, int newY) {
+        // Checking for a freaking en Passant
+        if(inPath.size() == 2 && board.enPassant != null && toMove != board.enPassant && inPath.contains(board.enPassant) && inPath.contains(toMove) && toMove.boardy == board.enPassant.boardy && toMove.boardy == boardy && Math.abs(toMove.boardx - board.enPassant.boardx) == 1 && newX == board.enPassant.boardx && toMove instanceof Pawn)
+            return true;
+
+        // will check if nothing's in the path and it's not being blocked; or if there's one thing in the path but it moves away; or if the piece captures this piece
+        if(newX == boardx && newY == boardy)
+            return false;
+        return (inPath.size() == 0 && !doesBlock(newX, newY)) || (inPath.size() == 1 && inPath.get(0) == toMove && !doesBlock(newX, newY));
+    }
 
     // PIECE SPECIFIC METHODS
+
+    @Override
+    public boolean otherKingInRange() {
+        King otherKing = board.getKing(Tools.opposite(side));
+        this.inPath.clear();
+        if(otherKing.boardx == boardx || otherKing.boardy == boardy){
+            // Get all pieces in between this and the other king
+            int xDiff = (int) Math.signum(otherKing.boardx - boardx);
+            int yDiff = (int) Math.signum(otherKing.boardy - boardy);
+            for(int x = boardx + xDiff, y = boardy + yDiff; board.getPiece(x, y) != otherKing; x += xDiff, y += yDiff){
+                if(board.getPiece(x, y) != null)
+                    inPath.add(board.getPiece(x, y));
+            }
+
+            return true;
+        }
+        return false;
+    }
 
     @Override
     public engine.Tools.Piece getPiece() {
@@ -93,9 +127,7 @@ public class Rook extends Piece {
 
     @Override
     public Rook copy() {
-        Rook toreturn = new Rook(boardx, boardy, side, board);
-        toreturn.isMoved = this.isMoved;
-        return toreturn;
+        return new Rook(this);
     }
 
     @Override

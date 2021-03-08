@@ -16,14 +16,30 @@ public abstract class Piece implements Copyable {
     /**
      * This is a memoization for the capturable spaces
      */
-    public HashSet<Integer> capturableSpaces;
+    public HashSet<Integer> capturableSpaces = new HashSet<>();
     protected int moveNumForSpaces = Integer.MIN_VALUE;
+
+    /**
+     * This gives an arraylist of pieces that are in the path from this piece to the king
+     */
+    public ArrayList<Piece> inPath = new ArrayList<>();
 
     public Piece(int x, int y, Tools.Side side, Board board) {
         this.boardx = x;
         this.boardy = y;
         this.side = side;
         this.board = board;
+    }
+
+    public Piece(Piece original){
+        this.boardx = original.boardx;
+        this.boardy = original.boardy;
+        this.side = original.side;
+        this.board = original.board;
+        this.moveNumForSpaces = original.moveNumForSpaces;
+
+        this.capturableSpaces = new HashSet<>(original.capturableSpaces);
+        this.inPath = new ArrayList<>(original.inPath);
     }
 
 
@@ -81,7 +97,7 @@ public abstract class Piece implements Copyable {
         ArrayList<Integer> toremove = new ArrayList<>();
         for (Integer number : toreturn) {
             for(Piece checking : board.checking)
-                if(!checking.doesBlock(Tools.getX(number), Tools.getY(number))) {
+                if(checking.willCheck(this, Tools.getX(number), Tools.getY(number))) {
                     toremove.add(number);
                     break;
                 }
@@ -125,6 +141,22 @@ public abstract class Piece implements Copyable {
      * @implNote If x=boardx & y=boardy, then this piece assumes that the other piece will "eat" this piece
      */
     public abstract boolean doesBlock(int x, int y);
+
+    /**
+     * Tells you whether or not the other king is in the range of this piece, and also updates [inPath] to all the pieces that are in between this piece and the other
+     * @return returns whether or not the opponent king is in the range of this piece
+     */
+    public abstract boolean otherKingInRange();
+
+    /**
+     *
+     * @param toMove The piece that is moving
+     * @param newX the new x coordinate to which the piece moves
+     * @param newY the new y coordinate to which the piece moves
+     * @return whether or not after [toMove] moves to (newX, newY), if the king will still be in check
+     * @implNote toMove should never be a king, there is a different method which the king should use to see if it can "move away" from the check
+     */
+    public abstract boolean willCheck(Piece toMove, int newX, int newY);
 
     // RENDERING
 

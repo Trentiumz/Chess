@@ -10,8 +10,38 @@ public class Bishop extends Piece{
 		super(x, y, side, board);
 	}
 
+	public Bishop(Bishop other){
+		super(other);
+	}
+
 
 	// GETTING WHERE IT CAN MOVE TO
+
+	@Override
+	public boolean otherKingInRange() {
+		King otherKing = board.getKing(Tools.opposite(side));
+		inPath.clear();
+		if(Math.abs(otherKing.boardx - boardx) == Math.abs(otherKing.boardy - boardy)){
+			// Get all pieces in between this and the other king
+			int xDiff = (int) Math.signum(otherKing.boardx - boardx);
+			int yDiff = (int) Math.signum(otherKing.boardy - boardy);
+			for(int x = boardx + xDiff, y = boardy + yDiff; board.getPiece(x, y) != otherKing; x += xDiff, y += yDiff){
+				if(board.getPiece(x, y) != null)
+					inPath.add(board.getPiece(x, y));
+			}
+
+			return true;
+		}
+		return false;
+	}
+
+	@Override
+	public boolean willCheck(Piece toMove, int newX, int newY) {
+		// will check if nothing's in the path and it's not being blocked; or if there's one thing in the path but it moves away; or if the piece captures this piece
+		if(newX == boardx && newY == boardy)
+			return false;
+		return (inPath.size() == 0 || inPath.size() == 1 && toMove == inPath.get(0)) && !doesBlock(newX, newY);
+	}
 
 	@Override
 	public boolean doesBlock(int x, int y) {
@@ -66,7 +96,7 @@ public class Bishop extends Piece{
 
 	@Override
 	public Bishop copy(){
-		return new Bishop(boardx, boardy, side, board);
+		return new Bishop(this);
 	}
 
 	@Override

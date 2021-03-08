@@ -14,11 +14,25 @@ public class King extends Piece {
         super(x, y, side, board);
     }
 
+    public King(King other){
+        super(other);
+        this.didMove = other.didMove;
+    }
+
 
     // MOVING
 
     @Override
-    public boolean doesBlock(int x, int y) throws InvalidPieceException{
+    public boolean otherKingInRange() throws InvalidBoardPositionException {
+        King otherKing = board.getKing(Tools.opposite(side));
+        inPath.clear();
+        if (Math.abs(otherKing.boardx - boardx) <= 1 && Math.abs(otherKing.boardy - boardy) <= 1)
+            throw new InvalidBoardPositionException("This " + side + " king at (" + boardx + " " + boardy + ") is not a valid position... the other king is at (" + otherKing.boardx + " " + otherKing.boardy + ")");
+        return false;
+    }
+
+    @Override
+    public boolean doesBlock(int x, int y) throws InvalidPieceException {
         throw new InvalidPieceException("You called a method which assumes that this king at (" + boardx + ", " + boardy + ") is able to check the other king, which is theoretically impossible!");
     }
 
@@ -27,20 +41,20 @@ public class King extends Piece {
             int rx = nx > boardx ? 7 : 0;
             Piece r = board.getPiece(rx, boardy);
             board.changePosition(board.getPiece(rx, boardy), nx > boardx ? 5 : 3, boardy);
-            board.addUndoMove(new Move(Tools.Instruction.move, r, new int[] {rx, boardy}));
+            board.addUndoMove(new Move(Tools.Instruction.move, r, new int[]{rx, boardy}));
         }
         Piece pieceAtPos = board.getPiece(nx, ny);
         if (pieceAtPos != null)
             if (pieceAtPos.side == this.side)
                 throw new AbleToMoveException("Somehow, this piece was able to collide into another piece on its side...");
-            else{
-                if(pieceAtPos == board.enPassant)
+            else {
+                if (pieceAtPos == board.enPassant)
                     board.addUndoMove(new Move(Tools.Instruction.setEnPassant, pieceAtPos, null));
                 board.removePiece(pieceAtPos);
                 board.addUndoMove(new Move(Tools.Instruction.add, pieceAtPos, null));
             }
 
-        if(!didMove)
+        if (!didMove)
             board.addUndoMove(new Move(Tools.Instruction.kingUnMoved, this, null));
 
         board.addUndoMove(new Move(Tools.Instruction.move, this, new int[]{boardx, boardy}));
@@ -64,6 +78,7 @@ public class King extends Piece {
         return toreturn;
     }
 
+
     // GETTING POSSIBLE MOVES
 
     @Override
@@ -83,8 +98,14 @@ public class King extends Piece {
     }
 
     @Override
+    public boolean willCheck(Piece toMove, int newX, int newY) throws InvalidBoardPositionException {
+        King otherKing = board.getKing(Tools.opposite(side));
+        throw new InvalidBoardPositionException("You just asked if this king at (" + boardx + " " + boardy + ") will check the other king at (" + otherKing.boardx + " " + otherKing.boardy + "), which theoretically you should never ask(this requires that otherKingInRange() to be true, which should never happen");
+    }
+
+    @Override
     protected HashSet<Integer> capturableSpaces() {
-        if(moveNumForSpaces != board.moveNum){
+        if (moveNumForSpaces != board.moveNum) {
             capturableSpaces = new HashSet<>();
             for (int[] direction : new int[][]{{1, 1}, {-1, -1}, {1, -1}, {-1, 1}, {1, 0}, {-1, 0}, {0, 1}, {0, -1}}) {
                 int cx = boardx + direction[0];
@@ -107,9 +128,7 @@ public class King extends Piece {
 
     @Override
     public King copy() {
-        King toreturn = new King(boardx, boardy, side, board);
-        toreturn.didMove = this.didMove;
-        return toreturn;
+        return new King(this);
     }
 
     @Override

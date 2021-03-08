@@ -18,7 +18,7 @@ public class Move {
 
     public Move(Tools.Instruction instruction, ArrayList<Piece> checking){
         this.instruction = instruction;
-        this.checking = checking;
+        this.checking = new ArrayList<>(checking);
     }
 
     public boolean isEqual(Move other){

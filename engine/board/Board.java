@@ -30,7 +30,7 @@ public class Board implements Copyable {
      */
     public final ArrayList<ArrayList<Move>> undoMoves;
 
-    // This is the set for any pieces that can
+    // This is the set for any pieces that have the king in their "range"
     public ArrayList<Piece> checking;
 
     // This is for debugging
@@ -42,6 +42,37 @@ public class Board implements Copyable {
             add(new ArrayList<>());
         }};
         checking = new ArrayList<>();
+    }
+
+    public Board(Board other){
+        for(int x = 0; x < 8; ++x)
+            for(int y = 0; y < 8; ++y){
+                if(other.getPiece(x,y) != null && other.getPiece(x,y) != other.whiteKing && other.getPiece(x,y) != other.blackKing
+                        && other.getPiece(x,y) != other.atEnd && other.getPiece(x,y) != other.enPassant)
+                    piecePositions[x][y] = other.piecePositions[x][y].copy();
+            }
+        addKing(other.whiteKing.copy());
+        addKing(other.blackKing.copy());
+        if(other.atEnd != null){
+            atEnd = other.atEnd.copy();
+            addPiece(atEnd);
+        }
+        if(other.enPassant != null){
+            enPassant = other.enPassant.copy();
+            addPiece(enPassant);
+        }
+
+        moveNum = other.moveNum;
+        // Generally, we shouldn't need this code, as bots would never undo before the current position
+        // undoMoves = new ArrayList<>(other.undoMoves);
+        undoMoves = new ArrayList<>();
+        checking = new ArrayList<>(other.checking);
+        this.currentMove = other.currentMove;
+
+        for(int x = 0; x < 8; ++x)
+            for(int y = 0; y < 8; ++y)
+                if(piecePositions[x][y] != null)
+                    piecePositions[x][y].board = this;
     }
 
 
@@ -128,6 +159,9 @@ public class Board implements Copyable {
     }
 
     public void changePosition(Piece piece, int nx, int ny){
+        if(nx == whiteKing.boardx && ny == whiteKing.boardy || nx == blackKing.boardx && ny == blackKing.boardy){
+            System.out.println("Piece is capturing King, it should be checkmate beforehand!");
+        }
         piecePositions[piece.boardx][piece.boardy] = null;
         piecePositions[nx][ny] = piece;
         piece.setPosition(nx, ny);
@@ -165,6 +199,9 @@ public class Board implements Copyable {
             }
         }
         currentMove = opposite();
+
+        // Lazy way of just recalculating what's being "checked"
+        checking = piecesWithKingInRange(currentMove);
         --moveNum;
     }
 
@@ -172,7 +209,7 @@ public class Board implements Copyable {
         currentMove = opposite();
         ++moveNum;
         undoMoves.get(undoMoves.size() - 1).add(new Move(Tools.Instruction.setChecking, checking));
-        checking = piecesChecking(currentMove);
+        checking = piecesWithKingInRange(currentMove);
     }
 
     public void initialize() {
@@ -193,7 +230,7 @@ public class Board implements Copyable {
         addKing(new King(4, 0, Tools.Side.Black, this));
         currentMove = Tools.Side.White;
 
-        checking = piecesChecking(currentMove);
+        checking = piecesWithKingInRange(currentMove);
     }
 
 
@@ -286,12 +323,12 @@ public class Board implements Copyable {
      * @param side the side of the king who is being checked
      * @return An Arraylist of the Pieces that are checking [side]
      */
-    public ArrayList<Piece> piecesChecking(Tools.Side side){
+    public ArrayList<Piece> piecesWithKingInRange(Tools.Side side){
         ArrayList<Piece> toReturn = new ArrayList<>();
         for(Piece[] column : piecePositions)
             for(Piece piece : column){
                 if(piece == null) continue;
-                if (piece.side != side && piece.capturableSpaces().contains(Tools.toNum(getKing(side).boardx, getKing(side).boardy))) {
+                if (piece.side != side && piece.otherKingInRange()) {
                     toReturn.add(piece);
                 }
             }
@@ -299,31 +336,7 @@ public class Board implements Copyable {
     }
 
     public Board copy() {
-        Board toreturn = new Board();
-        for(int x = 0; x < 8; ++x)
-            for(int y = 0; y < 8; ++y){
-                Piece p = piecePositions[x][y];
-                if(p == null) continue;
-                if (p != whiteKing && p != blackKing && p != atEnd && p != enPassant)
-                    toreturn.addPiece(p.copy());
-            }
-        toreturn.addKing(whiteKing.copy());
-        toreturn.addKing(blackKing.copy());
-        toreturn.currentMove = currentMove;
-        if (atEnd != null) {
-            toreturn.atEnd = atEnd.copy();
-            toreturn.addPiece(toreturn.atEnd);
-        }
-        if (enPassant != null) {
-            toreturn.enPassant = enPassant.copy();
-            toreturn.addPiece(toreturn.enPassant);
-        }
-        for(Piece[] column : toreturn.piecePositions)
-            for(Piece p : column) {
-                if (p == null) continue;
-                p.board = toreturn;
-            }
-        return toreturn;
+        return new Board(this);
     }
 
     public boolean isEmpty(int x, int y) {
@@ -370,12 +383,12 @@ public class Board implements Copyable {
         // Checking for perpetual draw
         if(undoMoves.size() >= 6){
             // If all of the last 6 moves were just all only moving pieces
-            if(undoMoves.get(undoMoves.size() - 1).size() == 1 && undoMoves.get(undoMoves.size() - 1).get(0).instruction == Tools.Instruction.move &&
-                undoMoves.get(undoMoves.size() - 2).size() == 1 && undoMoves.get(undoMoves.size() - 2).get(0).instruction == Tools.Instruction.move &&
-                undoMoves.get(undoMoves.size() - 3).size() == 1 && undoMoves.get(undoMoves.size() - 3).get(0).instruction == Tools.Instruction.move &&
-                undoMoves.get(undoMoves.size() - 4).size() == 1 && undoMoves.get(undoMoves.size() - 4).get(0).instruction == Tools.Instruction.move &&
-                undoMoves.get(undoMoves.size() - 5).size() == 1 && undoMoves.get(undoMoves.size() - 5).get(0).instruction == Tools.Instruction.move &&
-                undoMoves.get(undoMoves.size() - 6).size() == 1 && undoMoves.get(undoMoves.size() - 6).get(0).instruction == Tools.Instruction.move &&
+            if(undoMoves.get(undoMoves.size() - 1).size() == 2 && undoMoves.get(undoMoves.size() - 1).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 2).size() == 2 && undoMoves.get(undoMoves.size() - 2).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 3).size() == 2 && undoMoves.get(undoMoves.size() - 3).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 4).size() == 2 && undoMoves.get(undoMoves.size() - 4).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 5).size() == 2 && undoMoves.get(undoMoves.size() - 5).get(0).instruction == Tools.Instruction.move &&
+                undoMoves.get(undoMoves.size() - 6).size() == 2 && undoMoves.get(undoMoves.size() - 6).get(0).instruction == Tools.Instruction.move &&
                 undoMoves.get(undoMoves.size() - 1).get(0).piece == undoMoves.get(undoMoves.size() - 3).get(0).piece &&
                 undoMoves.get(undoMoves.size() - 1).get(0).piece == undoMoves.get(undoMoves.size() - 5).get(0).piece &&
                 undoMoves.get(undoMoves.size() - 2).get(0).piece == undoMoves.get(undoMoves.size() - 4).get(0).piece &&
