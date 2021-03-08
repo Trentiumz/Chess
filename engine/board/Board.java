@@ -87,8 +87,11 @@ public class Board implements Copyable {
      */
     public void doMove(@NotNull Piece piece, int[] instruction) {
         movePiece(piece, instruction[0], instruction[1]);
-        if (piece == atEnd)
-            atEnd.promote(Tools.promotionOrder[instruction[2]]);
+        if (piece == atEnd) {
+            Piece newPiece = atEnd.promote(Tools.promotionOrder[instruction[2]]);
+            removePiece(atEnd);
+            addPiece(newPiece);
+        }
     }
 
     // BOARD EDITTING

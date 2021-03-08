@@ -1,0 +1,41 @@
+	addKing(new King(4, 0, Tools.Side.Black, this));
+        addKing(new King(4, 7, Tools.Side.White, this));
+        addPiece(new Rook(0, 7, Tools.Side.White, this));
+        addPiece(new Knight(4, 4, Tools.Side.Black, this));
+        addPiece(new Queen(4, 6, Tools.Side.White, this));
+        addPiece(new Pawn(3, 3, Tools.Side.Black, this));
+        addPiece(new Knight(3, 4, Tools.Side.Black, this));
+
+        addPiece(new Rook(0, 0, Tools.Side.Black, this));
+        addPiece(new Queen(3, 0, Tools.Side.Black, this));
+        addPiece(new Rook(7, 0, Tools.Side.Black, this));
+        addPiece(new Knight(2, 5, Tools.Side.White, this));
+        addPiece(new Bishop(2, 7, Tools.Side.White, this));
+        addPiece(new Bishop(5, 0, Tools.Side.Black, this));
+        addPiece(new Knight(6, 3, Tools.Side.White, this));
+
+        addPiece(new Pawn(2, 6, Tools.Side.White, this));
+        addPiece(new Pawn(1, 6, Tools.Side.White, this));
+        addPiece(new Pawn(0, 6, Tools.Side.White, this));
+        addPiece(new Pawn(5, 6, Tools.Side.White, this));
+        addPiece(new Pawn(6, 6, Tools.Side.White, this));
+        addPiece(new Pawn(7, 5, Tools.Side.White, this));
+        addPiece(new Pawn(4, 3, Tools.Side.White, this));
+        addPiece(new Pawn(0, 1, Tools.Side.Black, this));
+        addPiece(new Pawn(1, 1, Tools.Side.Black, this));
+        addPiece(new Pawn(2, 1, Tools.Side.Black, this));
+        addPiece(new Pawn(4, 1, Tools.Side.Black, this));
+        addPiece(new Pawn(5, 1, Tools.Side.Black, this));
+        addPiece(new Pawn(6, 1, Tools.Side.Black, this));
+        addPiece(new Pawn(7, 1, Tools.Side.Black, this));
+
+
+
+===================================
+Essentially, it isn't that it finds the kxc1 very favorable, it's that after kxg5, the ai doesn't ever consider 
+moving away(because the position itself is very good, but it's undefended)... and ke6, kxe6, pxe6, kxe4, pxe4, qxd8; going down 
+this path leads to a balanced game, but the ai never considers a depth that's deep enough to fully complete the simulation of 
+all of the trades, so it finds this position unfavorable.
+
+- either add functionality to make the rating consider the pieces that are attacking and defending another piece
+- or increase the tree search depth
