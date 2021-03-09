@@ -55,13 +55,11 @@ class Evaluator implements Runnable {
         Arrays.sort(moves, Comparator.comparingInt((int[][] a) -> a[2][0]));
 
         int optimalRating;
-//        System.out.println(board.getMoves(currentSide).length);
         if(currentSide == Tools.Side.White){
             optimalRating = Integer.MIN_VALUE;
 
             // Alpha-Beta pruning; we assume both sides will only play the top x moves
             for (int i = moves.length - 1; i > moves.length - 1 - movesPerLayer && i >= 0; --i) {
-//                System.out.println(board.getMoves(currentSide).length);
                 // Mostly for debugging
                 if(!board.canMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
                     System.out.println("Copy failed to move");
@@ -83,11 +81,9 @@ class Evaluator implements Runnable {
             optimalRating = Integer.MAX_VALUE;
 
             for (int i = 0; i < movesPerLayer && i < moves.length; ++i) {
-//                System.out.println(board.getMoves(currentSide).length);
                 if(!board.canMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1])){
                     System.out.println("Copy failed to move");
                 }
-//                System.out.println(board.getPiece(moves[i][0][0], moves[i][0][1]));
                 board.doMove(board.getPiece(moves[i][0][0], moves[i][0][1]), moves[i][1]);
                 board.nextMove();
 

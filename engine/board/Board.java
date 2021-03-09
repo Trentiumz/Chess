@@ -228,6 +228,7 @@ public class Board implements Copyable {
         }
         addKing(new King(4, 7, Tools.Side.White, this));
         addKing(new King(4, 0, Tools.Side.Black, this));
+
         currentMove = Tools.Side.White;
 
         checking = piecesWithKingInRange(currentMove);
@@ -418,6 +419,21 @@ public class Board implements Copyable {
             case White -> whiteKing;
             case Black -> blackKing;
         };
+    }
+
+    public void printBoardConfig(){
+        for(int x = 0; x < 8; ++x)
+            for(int y = 0; y < 8; ++y){
+                if(getPiece(x,y) != null && getPiece(x,y) != whiteKing && getPiece(x,y) != blackKing
+                        && getPiece(x,y) != atEnd && getPiece(x,y) != enPassant)
+                    System.out.println("addPiece(new " + getPiece(x, y).getClass().getName() + "(" + x + ", " + y + ", " + "Tools.Side." + getPiece(x,y).side + ", this));");
+            }
+        System.out.println("addKing(new King(" + whiteKing.boardx + ", " + whiteKing.boardy + ", " + "Tools.Side.White, this));");
+        System.out.println("addKing(new King(" + blackKing.boardx + ", " + blackKing.boardy + ", " + "Tools.Side.Black, this));");
+        if(enPassant != null)
+            System.out.println("this.enPassant = getPiece(" + enPassant.boardx + ", " + enPassant.boardy + ");");
+        if(atEnd != null)
+            System.out.println("this.atEnd = getPiece(" + atEnd.boardx + ", " + atEnd.boardy + ";");
     }
 
 }

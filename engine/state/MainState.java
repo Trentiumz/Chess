@@ -61,6 +61,8 @@ public class MainState implements State{
         if(key == 'z'){
             board.board.undoLatest(Tools.opposite(playerSide));
             board.board.undoLatest(playerSide);
+        }else if(key == 's'){
+            board.board.printBoardConfig();
         }
     }
 }
