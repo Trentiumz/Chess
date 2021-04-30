@@ -48,6 +48,8 @@ Inside the sprites folder, you'll see various sprites that are used for renderin
 Inside the botAssist/positionRatings folder, you'll see various files that just store information on the rating change to apply for various position for various pieces. This 
 will help the bot make decisions based not solely on piece value, but also on how valuable they are in a specific position. 
 
+Furthermore, there's a drawio file, which you can open with draw.io - it's pretty much a flowchart that I use to plan out and analyze what the heck the bot's gonna be able to do
+
 # Current Progress
 Using a bit of java profiling, I realized, after a few bug fixes, that we spend a lot of time trying to see if a move creates a check. Therefore, we'll be reducing the number of times we check whether or not a move results in an invalid check.
 
