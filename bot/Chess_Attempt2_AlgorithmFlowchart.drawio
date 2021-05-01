@@ -1,4 +1,4 @@
-<mxfile host="app.diagrams.net" modified="2021-04-30T23:52:57.809Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 OPR/75.0.3969.218" etag="aJJL9nBQhbQkth14WCK6" version="14.6.9" type="github" pages="3">
+<mxfile host="app.diagrams.net" modified="2021-05-01T11:34:50.823Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.128 Safari/537.36 OPR/75.0.3969.218" etag="j6xoPVNRifgnxRNqbCF_" version="14.6.9" type="github" pages="3">
   <diagram id="C5RBs43oDa-KdzZeNtuy" name="Definitions">
     <mxGraphModel dx="1382" dy="764" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -26,7 +26,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="tIxm_2JEZQ_qYNFVAXUs" name="Main Overview">
-    <mxGraphModel dx="2476" dy="1999" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="2024" dy="1745" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="d6WLnALJwDJ_RtDQIaNG-0" />
         <mxCell id="d6WLnALJwDJ_RtDQIaNG-1" parent="d6WLnALJwDJ_RtDQIaNG-0" />
@@ -175,7 +175,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="2Rf0pJD1pQTmd6xX7p-X" name="Moving &amp; Rating">
-    <mxGraphModel dx="1626" dy="899" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="1174" dy="645" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="h4ntUMJiJUE_A8WayHQY-0" />
         <mxCell id="h4ntUMJiJUE_A8WayHQY-1" parent="h4ntUMJiJUE_A8WayHQY-0" />
@@ -305,7 +305,7 @@
             <mxPoint x="1360" y="430" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="fNAhgXy2wZgyrlp8dIVo-23" value="Return if the King&#39;s in range and if PIP has &amp;lt;= 2 elements" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="h4ntUMJiJUE_A8WayHQY-1">
+        <mxCell id="fNAhgXy2wZgyrlp8dIVo-23" value="Return if the King&#39;s in range&amp;nbsp;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="h4ntUMJiJUE_A8WayHQY-1">
           <mxGeometry x="1302.5" y="480" width="115" height="60" as="geometry" />
         </mxCell>
         <mxCell id="fNAhgXy2wZgyrlp8dIVo-27" value="Returns if the Enemy King is in range, and updates to store the pieces in its path" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="h4ntUMJiJUE_A8WayHQY-1">
@@ -437,7 +437,7 @@
         <mxCell id="X8eQXAgSh8zrn3LgJRTD-48" value="Returns the valid moves" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;" vertex="1" parent="h4ntUMJiJUE_A8WayHQY-1">
           <mxGeometry x="630" y="500" width="150" height="20" as="geometry" />
         </mxCell>
-        <mxCell id="X8eQXAgSh8zrn3LgJRTD-49" value="8*32 &quot;cells&quot; in each &quot;line&quot;, 32 * 14 moves to consider; each of these considerations is pretty much constant; 700-1k operations" style="shape=card;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="h4ntUMJiJUE_A8WayHQY-1">
+        <mxCell id="X8eQXAgSh8zrn3LgJRTD-49" value="5*16 &quot;cells&quot; in each &quot;line&quot;, 16*10 moves to consider; each of these considerations is pretty much constant; 250 operations" style="shape=card;whiteSpace=wrap;html=1;fontSize=20;" vertex="1" parent="h4ntUMJiJUE_A8WayHQY-1">
           <mxGeometry x="10" y="775" width="290" height="145" as="geometry" />
         </mxCell>
       </root>
