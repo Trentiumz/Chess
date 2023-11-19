@@ -23,7 +23,7 @@ public class BotMain {
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 50;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
-    public static final boolean toDebug = false;
+    public static final boolean toDebug = true;
 
     public BotMain(Board board, Side botSide) {
         this.board = board;

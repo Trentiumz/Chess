@@ -43,6 +43,7 @@ class BotMainTest {
 
         board = new Board(template, Side.Black, Version1Rating.getRater());
         bot = new BotMain(board, Side.Black);
+        System.out.println(bot.getMove());
     }
 
     @Test
@@ -50,6 +51,21 @@ class BotMainTest {
         Piece[][] template = null;
         Board board = null;
         BotMain bot = null;
+
+        template = new Piece[][]{
+                {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.White), new Piece(PieceType.Rook, Side.White), new Piece(PieceType.King, Side.White), new Piece(PieceType.Empty, Side.Neither)},
+                {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither)},
+                {new Piece(PieceType.Pawn, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither)},
+                {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither)},
+                {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither)},
+                {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black)},
+                {new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither)},
+                {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.King, Side.Black), new Piece(PieceType.Empty, Side.Neither)},
+        };
+        board = new Board(template, Side.Black, Version1Rating.getRater());
+        board.printBoard();
+        bot = new BotMain(board, Side.Black);
+        System.out.println(bot.getMove());
 
         template = new Piece[][]{
                 {new Piece(PieceType.Rook, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.White), new Piece(PieceType.Queen, Side.White), new Piece(PieceType.King, Side.White), new Piece(PieceType.Bishop, Side.White), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.White)},
