@@ -3,9 +3,12 @@ package bot;
 import engine.Tools;
 import engine.board.Board;
 import engine.board.Pawn;
+import engine.board.Piece;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashSet;
 
 class Evaluator implements Runnable {
 
@@ -14,7 +17,6 @@ class Evaluator implements Runnable {
     private final Tools.Side currentSide;
     private final Board board;
     private final int movesPerLayer;
-
 
     public Evaluator(int layers, Tools.Side currentSide, int movesPerLayer, Board board) {
         this.layers = layers;
@@ -27,6 +29,7 @@ class Evaluator implements Runnable {
         result = ratingBounds(layers, board, currentSide);
     }
 
+    int count = 0;
     /**
      * Returns the optimal rating using the minimax algorithm
      * @param layers the "depth" of which to calculate
@@ -35,6 +38,9 @@ class Evaluator implements Runnable {
      * @return The optimal rating
      */
     private int ratingBounds(int layers, Board board, Tools.Side currentSide) {
+        ++count;
+        if(count % 100000 == 0)
+            System.out.println(count);
         // If we've reached the target depth or there are no moves left, then we return the current rating
         if (layers <= 0)
             return board.rating();
@@ -109,11 +115,12 @@ class Evaluator implements Runnable {
      * @return the rating of currentSide after currentSide does the move
      */
     public static int getRating(int[][] move, Board board, Tools.Side currentSide){
-        if(!board.canMove(board.getPiece(move[0][0], move[0][1]), move[1])){
+        Piece pieceAt = board.getPiece(move[0][0], move[0][1]);
+        if(!board.canMove(pieceAt, move[1])){
             System.out.println("oop board failed move");
         }
         // Do the move
-        board.doMove(board.getPiece(move[0][0], move[0][1]), move[1]);
+        board.doMove(pieceAt, move[1]);
         board.nextMove();
         int fr = board.rating();
         board.undoLatest(currentSide);

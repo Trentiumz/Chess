@@ -16,8 +16,8 @@ public class BotMain {
     public final BoardClient board;
     public Tools.Side botSide;
 
-    public final static int layers = 6;
-    public final static int movesPerLayer = 8;
+    public final static int layers = 5;
+    public final static int movesPerLayer = 50;
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 50;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
