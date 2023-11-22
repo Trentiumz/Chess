@@ -23,7 +23,8 @@ public class BotMain {
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 50;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
-    public static final boolean toDebug = false;
+    public static final boolean toDebug = true;
+    public int counter = 0;
 
     public BotMain(Board board, Side botSide) {
         this.board = board;
@@ -75,6 +76,7 @@ public class BotMain {
         float best = botSide == Side.White ? Integer.MIN_VALUE : Integer.MAX_VALUE;
         for (int i = 0; i < evals; ++i) {
             float forcedRating = toRuns[i].getResult();
+            counter += toRuns[i].counter;
             if ((forcedRating > best) == (botSide == Side.White)) {
                 best = forcedRating;
                 bestMove = moves.get(i).move;

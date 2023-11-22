@@ -52,7 +52,7 @@ public class MainState implements State{
                     botPieces[r][c] = new Piece(type, cur == null ? Side.Neither : cur.side == Tools.Side.White ? Side.White : Side.Black);
                 }
             }
-            bot_v2.board.Board botBoard = new Board(botPieces, playerSide == Tools.Side.White ? Side.Black : Side.White, Version1Rating.getRater());
+            bot_v2.board.Board botBoard = new Board(botPieces, playerSide == Tools.Side.White ? Side.Black : Side.White, new Version1Rating());
             botBoard.printConfig();
             BotMain botteu = new BotMain(botBoard, playerSide == Tools.Side.White ? Side.Black : Side.White);
             try {

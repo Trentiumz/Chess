@@ -5,6 +5,7 @@ import bot_v2.Piece;
 import bot_v2.PieceType;
 import bot_v2.Side;
 import bot_v2.rater.BoardRater;
+import bot_v2.rater.Version1Rating;
 
 import java.util.*;
 
@@ -21,7 +22,6 @@ public class Board {
     private final ArrayDeque<Side> sides;
     private ArrayDeque<Board> copies;
     private final BoardRater rater;
-
     private Side curMove;
 
     public Board(Board copy) {
@@ -34,13 +34,11 @@ public class Board {
         this.moves = copy.moves.clone();
         this.sides = copy.sides.clone();
         if (DEBUG) this.copies = copy.copies.clone();
-        this.rater = copy.rater;
+        this.rater = copy.rater.copy();
         this.curMove = copy.curMove;
     }
 
     public Board(Piece[][] board, Side curMove, BoardRater rater) {
-        this.rater = rater;
-
         // if the board is null, then set it up with default values
         if (board == null) {
             board = new Piece[8][8];
@@ -72,6 +70,10 @@ public class Board {
             this.board[i] = Arrays.copyOf(board[i], board[i].length);
         }
 
+        // initialize rating system
+        this.rater = rater;
+        rater.setBoard(this.board);
+
         // create check detection boards
         white = new CheckDetection(board, Side.White);
         black = new CheckDetection(board, Side.Black);
@@ -98,6 +100,7 @@ public class Board {
     private void remPiece(int r, int c) {
         white.remPiece(r, c);
         black.remPiece(r, c);
+        rater.remPiece(r, c);
 
         board[r][c] = Piece.EMPTY;
     }
@@ -112,6 +115,7 @@ public class Board {
     private void addPiece(int r, int c, Piece toAdd) {
         white.addPiece(r, c, toAdd);
         black.addPiece(r, c, toAdd);
+        rater.addPiece(toAdd, r, c);
 
         board[r][c] = toAdd;
     }
@@ -315,6 +319,9 @@ public class Board {
 
         curMove = curMove == Side.White ? Side.Black : Side.White;
 
+        // get the rater to move
+        rater.makeMove(move);
+
         if (DEBUG) {
             copies.add(new Board(this));
             white.inCheck();
@@ -368,6 +375,9 @@ public class Board {
         }
 
         curMove = curMove == Side.White ? Side.Black : Side.White;
+
+        // get the rater to move
+        rater.undoLastMove();
     }
 
     /**
@@ -379,7 +389,7 @@ public class Board {
     public float rating() {
         if (isLost()) return curMove == Side.White ? -9000 : 9000;
 
-        return rater.rating(this, curMove);
+        return rater.rating();
     }
 
     public Side getCurMove() {

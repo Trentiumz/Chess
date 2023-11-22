@@ -17,13 +17,13 @@ class BoardTest {
 
     @Test
     void moveNumberTest() {
-        Board board = new Board(Version1Rating.getRater());
+        Board board = new Board(new Version1Rating());
         assertEquals(board.getMoves().size(), 20);
     }
 
     @Test
     void moveUndoTest() {
-        Board board = new Board(Version1Rating.getRater());
+        Board board = new Board(new Version1Rating());
         board.makeMove(Side.White, new Move(1, 3, 3, 3, Piece.EMPTY));
         assertEquals(board.getMoves().size(), 20);
         assertTrue(board.checkLines());
@@ -53,7 +53,7 @@ class BoardTest {
                 {new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Queen, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.Black)},
                 {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Knight, Side.Black), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Queen, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Knight, Side.Black), new Piece(PieceType.Empty, Side.Neither)},
         };
-        System.out.println(new Board(template, Side.Black, Version1Rating.getRater()).rating());
+        System.out.println(new Board(template, Side.Black, new Version1Rating()).rating());
 
 
         template = new Piece[8][8];
@@ -64,7 +64,7 @@ class BoardTest {
         }
         template[0][0] = new Piece(PieceType.King, Side.White);
         template[7][0] = new Piece(PieceType.King, Side.Black);
-        board = new Board(template, Side.White, Version1Rating.getRater());
+        board = new Board(template, Side.White, new Version1Rating());
         assertEquals(0, board.rating(), 0.05f);
 
         Piece[][] template1 = {
@@ -77,7 +77,7 @@ class BoardTest {
                 {new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither)},
                 {new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.Knight, Side.Black), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Queen, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Knight, Side.Black), new Piece(PieceType.Rook, Side.Black)},
         };
-        board = new Board(template1, Side.Black, Version1Rating.getRater());
+        board = new Board(template1, Side.Black, new Version1Rating());
         System.out.println(board.rating());
     }
 
@@ -93,7 +93,7 @@ class BoardTest {
                 {new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black)},
                 {new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.Black)},
         };
-        Board board = new Board(template, Side.Black, Version1Rating.getRater());
+        Board board = new Board(template, Side.Black, new Version1Rating());
         board.getMoves();
     }
 
@@ -113,7 +113,7 @@ class BoardTest {
                 {new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Knight, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black)},
                 {new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.King, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.Black)},
         };
-        board = new Board(template, Side.White, Version1Rating.getRater());
+        board = new Board(template, Side.White, new Version1Rating());
         moves = board.getMoves();
         assertEquals(1, moves.stream().filter(move -> move.castle).count());
         Board copy1 = new Board(board);
@@ -133,7 +133,7 @@ class BoardTest {
                 {new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Knight, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Pawn, Side.Black), new Piece(PieceType.Pawn, Side.Black)},
                 {new Piece(PieceType.Rook, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Bishop, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.King, Side.Black), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Empty, Side.Neither), new Piece(PieceType.Rook, Side.Black)},
         };
-        board = new Board(template, Side.White, Version1Rating.getRater());
+        board = new Board(template, Side.White, new Version1Rating());
         moves = board.getMoves();
         assertEquals(0, moves.stream().filter(move -> move.castle).count());
     }

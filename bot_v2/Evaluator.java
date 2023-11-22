@@ -2,10 +2,7 @@ package bot_v2;
 
 import bot_v2.board.Board;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class Evaluator implements Runnable {
@@ -15,6 +12,7 @@ class Evaluator implements Runnable {
     private final Side currentSide;
     private final Board board;
     private final int movesPerLayer;
+    public int counter = 0;
 
     public Evaluator(int layers, Side currentSide, int movesPerLayer, Board board) {
         this.layers = layers;
@@ -35,6 +33,7 @@ class Evaluator implements Runnable {
      * @return The optimal rating
      */
     private float ratingBounds(int layers, Board board, Side currentSide) throws IllegalStateException {
+        ++counter;
         // If we've reached the target depth or there are no moves left, then we return the current rating
         if (layers <= 0)
             return board.rating();
@@ -42,12 +41,15 @@ class Evaluator implements Runnable {
         if(board.getCurMove() != currentSide) throw new IllegalStateException("The bot is trying to play a side it shouldn't!");
 
         // get a list of moves alongside their rating
-        List<RatedMove> moves = board.getMoves().stream().map((move) -> {
-            board.makeMove(currentSide, move);
-            RatedMove ret = new RatedMove(move, board.rating());
+        List<Move> possibleMoves = board.getMoves();
+        List<RatedMove> moves = new ArrayList<>(possibleMoves.size());
+        for (Move possibleMove : possibleMoves) {
+            board.makeMove(currentSide, possibleMove);
+            RatedMove ret = new RatedMove(possibleMove, board.rating());
             board.undoLastMove();
-            return ret;
-        }).sorted().collect(Collectors.toList());
+            moves.add(ret);
+        }
+        Collections.sort(moves);
 
         // Sorted from most desireable to least desireable moves
         if(currentSide == Side.White) Collections.reverse(moves);
