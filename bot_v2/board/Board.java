@@ -6,6 +6,7 @@ import bot_v2.PieceType;
 import bot_v2.Side;
 import bot_v2.rater.BoardRater;
 import bot_v2.rater.Version1Rating;
+import engine.board.King;
 
 import java.util.*;
 
@@ -13,6 +14,7 @@ import java.util.*;
  * A board that stores game information :thumbsup:
  */
 public class Board {
+    // TODO draw mechanics, rook castle checking
     private final static boolean DEBUG = false;
 
     public final CheckDetection white, black;
@@ -422,6 +424,28 @@ public class Board {
             }
             System.out.println();
         }
+    }
+
+    /**
+     * @return a hash of the board in readable string format
+     */
+    public String boardHash(){
+        StringBuilder sb = new StringBuilder();
+        for(int r = 0; r < 8; ++r) for(int c = 0; c < 8; ++c) {
+            int val = switch(board[r][c].type){
+                case King-> 1;
+                case Queen -> 2;
+                case Bishop -> 3;
+                case Knight -> 4;
+                case Rook -> 5;
+                case Pawn -> 6;
+                case Empty -> 0;
+            };
+            if(board[r][c].type != PieceType.Empty && board[r][c].side == Side.Black) val += 6;
+            sb.append(val);
+            if(r < 7 || c < 7) sb.append(' ');
+        }
+        return sb.toString();
     }
 
     /**

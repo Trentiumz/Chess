@@ -8,8 +8,13 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class BotMainTest {
+class BotMainErrorTesting {
 
+    /*
+    * Benchmarking
+    * Revision 41576711c7dba201e7b640d2e916e0f3d17298f0, test1 at 5.866 seconds
+    * Revision c1d0403211bfed15bb3bf1be0d93b42549f448f8, test1 at 4.929 seconds
+     */
     @Test
     void test1() throws InterruptedException, TimeoutException {
         Piece[][] template = null;

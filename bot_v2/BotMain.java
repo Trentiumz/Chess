@@ -1,10 +1,10 @@
 package bot_v2;
 
-import bot.InvalidSideException;
-import bot.UnableToMoveException;
 import bot_v2.board.Board;
-import engine.Tools;
+import bot_v2.evaluators.BruteEvaluator;
+import bot_v2.evaluators.Evaluator;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -23,7 +23,7 @@ public class BotMain {
     // int[first move] = {int[] first instruction, int[] second instruction, {rating Bounds} }
     public final static int firstMoveCount = 50;
     public volatile Evaluator[] toRuns = new Evaluator[firstMoveCount];
-    public static final boolean toDebug = true;
+    public static final boolean toDebug = false;
     public int counter = 0;
 
     public BotMain(Board board, Side botSide) {
@@ -32,12 +32,7 @@ public class BotMain {
     }
 
     // GETTING THE MOVES
-    /**
-     * Gets the highest rated move from the board
-     *
-     * @return the highest rated move from the board
-     */
-    public Move getMove() throws InterruptedException, TimeoutException, IllegalStateException {
+    public List<RatedMove> getMoves(int layers, int movesPerLayer) throws InterruptedException, TimeoutException {
         if(botSide != board.getCurMove()) throw new IllegalStateException("Bot is moving on the wrong move");
 
         // get a list of moves alongside their rating
@@ -58,7 +53,57 @@ public class BotMain {
         for(int i = 0; i < evals && i < moves.size(); i++) {
             Board copy = new Board(board);
             copy.makeMove(botSide, moves.get(i).move);
-            toRuns[i] = new Evaluator(layers - 1, botSide == Side.White ? Side.Black : Side.White, movesPerLayer, copy);
+            toRuns[i] = new BruteEvaluator(layers - 1, botSide == Side.White ? Side.Black : Side.White, movesPerLayer, copy);
+
+            if(toDebug) {
+                toRuns[i].run();
+            } else {
+                executor.execute(toRuns[i]);
+            }
+        }
+
+        executor.shutdown();
+        if (!executor.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS)) {
+            throw new TimeoutException("oop lol the ai timed out");
+        }
+
+        List<RatedMove> ret = new ArrayList<>();
+        for (int i = 0; i < evals; ++i) {
+            float forcedRating = toRuns[i].getResult();
+            ret.add(new RatedMove(moves.get(i).move, forcedRating));
+        }
+
+        Collections.sort(ret);
+
+        return ret;
+    }
+    /**
+     * Gets the highest rated move from the board
+     *
+     * @return the highest rated move from the board
+     */
+    public Move getMove(int layers, int movesPerLayer) throws InterruptedException, TimeoutException, IllegalStateException {
+        if(botSide != board.getCurMove()) throw new IllegalStateException("Bot is moving on the wrong move");
+
+        // get a list of moves alongside their rating
+        List<RatedMove> moves = board.getMoves().stream().map((move) -> {
+            board.makeMove(botSide, move);
+            RatedMove ret = new RatedMove(move, board.rating());
+            board.undoLastMove();
+            return ret;
+        }).sorted().collect(Collectors.toList());
+
+        // Sorted from most desireable to least desireable moves
+        if(botSide == Side.White) Collections.reverse(moves);
+
+        // Get the number of evaluations
+        int evals = Math.min(toRuns.length, moves.size());
+        ExecutorService executor = Executors.newFixedThreadPool(evals);
+
+        for(int i = 0; i < evals && i < moves.size(); i++) {
+            Board copy = new Board(board);
+            copy.makeMove(botSide, moves.get(i).move);
+            toRuns[i] = new BruteEvaluator(layers - 1, botSide == Side.White ? Side.Black : Side.White, movesPerLayer, copy);
 
             if(toDebug) {
                 toRuns[i].run();
@@ -84,5 +129,8 @@ public class BotMain {
         }
 
         return bestMove;
+    }
+    public Move getMove() throws InterruptedException, TimeoutException {
+        return getMove(layers, movesPerLayer);
     }
 }
